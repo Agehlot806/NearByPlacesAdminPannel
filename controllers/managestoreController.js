@@ -157,7 +157,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
     const store = await Store.findById(req.query.id);
   
     if (!store) {
-      return next(new ErrorHander("Store not found", 404));
+      return next(new ErrorHandler("Store not found", 404));
     }
     res.status(200).json({
       success: true,
@@ -170,7 +170,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
     const store = await Store.findById(req.query.StoreId);
   
     if (!store) {
-      return next(new ErrorHander("Store not found", 404));
+      return next(new ErrorHandler("Store not found", 404));
     }
     const reviews = store.reviews.filter(
       (rev) => rev._id.toString() !== req.query.id.toString()
