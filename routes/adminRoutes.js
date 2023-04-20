@@ -16,4 +16,4 @@ router.route("/testapi").get(testapi);
 router.route("/resetpassword/:token").put(resetPassword);
 
 
-export default router;
+export default router; 

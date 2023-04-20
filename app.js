@@ -2,7 +2,6 @@ import express from "express";
 import { config} from "dotenv";
 import ErrorMiddleware from "./middlewares/Error.js";
 import cookieParser from "cookie-parser";
-// import bodyParser from "body-parser";
 import cors from "cors";
 const app = express();
 config({
@@ -11,6 +10,7 @@ config({
 
 //using middlewares
 app.use(express.json());
+
 // app.use(bodyParser({
 //     urlencoded:true
 // }))

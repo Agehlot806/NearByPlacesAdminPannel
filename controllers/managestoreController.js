@@ -3,6 +3,7 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
+import ApiFeatures from "../utils/apifeatures.js";
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
     const {name,category,phonenumber,website,details,videourl,latitude,longitude} = req.body;
     if (!name || !category||!latitude||!longitude||!phonenumber)
@@ -39,11 +40,17 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
     });
   });
 
+ 
   export const GetAllStores  = catchAsyncError(async (req, res, next) => {
-    const stores = await Store.find({});
+    const resultPerPage =5;
+    const storeCount = await Store.countDocuments();
+    const apiFeature = new ApiFeatures(Store.find(),req.query).search().filter().pagination(resultPerPage);
+    let stores = await apiFeature.query;
     res.status(200).json({
       success: true,
       stores,
+      storeCount,
+      resultPerPage
     });
   });
 
@@ -107,5 +114,102 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
     });
   });
 
+  //create review by user and access to both admin and user 
+  export const createStoreReview = catchAsyncError(async (req, res, next) => {
+    const {rating, comment, StoreId } = req.body;
+    const review = {
+      user: req.user._id,
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+    };
+    const store = await Store.findById(StoreId);
+    const isReviewed = store.reviews.find(
+      (rev) => rev.user.toString() === req.user._id.toString()
+    );
+    if (isReviewed) {
+      store.reviews.forEach((rev) => {
+        if (rev.user.toString() === req.user._id.toString())
+          (rev.rating = rating), (rev.comment = comment);
+      });
+    } else {
+      store.reviews.push(review);
+      store.numOfReviews = store.reviews.length;
+    }
+  
+    let avg = 0;
+  
+    store.reviews.forEach((rev) => {
+      avg += rev.rating;
+    });
+  
+    store.ratings = avg / store.reviews.length;
+  
+    await store.save({ validateBeforeSave: false });
+  
+    res.status(200).json({
+      success: true,
+    });
+  });
 
 
+  //get store review by admin
+  export const getStoreReview = catchAsyncError(async (req, res, next) => {
+    const store = await Store.findById(req.query.id);
+    if (!store) {
+      return next(new ErrorHandler("Store not found", 404));
+    }
+    res.status(200).json({
+      success: true,
+      reviews: store.reviews,
+    });
+  });
+
+
+//delete review by user
+  export const deleteReview = catchAsyncError(async (req, res, next) => {
+    const product = await Product.findById(req.query.productId);
+  
+    if (!product) {
+      return next(new ErrorHander("Product not found", 404));
+    }
+  
+    const reviews = product.reviews.filter(
+      (rev) => rev._id.toString() !== req.query.id.toString()
+    );
+  
+    let avg = 0;
+  
+    reviews.forEach((rev) => {
+      avg += rev.rating;
+    });
+  
+    let ratings = 0;
+  
+    if (reviews.length === 0) {
+      ratings = 0;
+    } else {
+      ratings = avg / reviews.length;
+    }
+  
+    const numOfReviews = reviews.length;
+  
+    await Product.findByIdAndUpdate(
+      req.query.productId,
+      {
+        reviews,
+        ratings,
+        numOfReviews,
+      },
+      {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false,
+      }
+    );
+  
+    res.status(200).json({
+      success: true,
+    });
+  });
+  

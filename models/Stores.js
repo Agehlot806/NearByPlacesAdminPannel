@@ -44,6 +44,36 @@ const schema = new mongoose.Schema({
             required:true,
         }
     },
+    numOfReviews: {
+        type: Number,
+        default: 0,
+      },
+
+      ratings: {
+        type: Number,
+        default: 0,
+      },
+      reviews: [
+        {
+          user: {
+            type: mongoose.Schema.ObjectId,
+            ref: "Admin",
+            required: true,
+          },
+          name: {
+            type: String,
+            required: true,
+          },
+          rating: {
+            type: Number,
+            required: true,
+          },
+          comment: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
    
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
