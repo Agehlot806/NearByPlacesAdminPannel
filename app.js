@@ -10,12 +10,6 @@ config({
 
 //using middlewares
 app.use(express.json());
-
-// app.use(bodyParser({
-//     urlencoded:true
-// }))
-
-
 app.use(
     express.urlencoded({
         extended: true,
@@ -24,21 +18,27 @@ app.use(
 
 app.use(cookieParser());
 
+// app.use(bodyParser({
+//     urlencoded:true
+// }))
 app.use(
 	cors({
 		origin: "http://localhost:3000",
-		methods: "GET,POST,PUT,DELETE",
 		credentials: true,
+		methods: ["GET", "POST", "PUT", "DELETE"],
 	})
 );
 
 //importing routes
-import admin from "./routes/adminRoutes.js";
+import admin from "./routes/userRoutes.js";
 import stores from "./routes/newStoreRoutes.js"
 app.use("/api/v1", admin);
 app.use("/api/v1",stores)
 
-
-
 export default app;
+app.get("/", (req, res) =>
+  res.send(
+    `<h1>Site is Working. click <a href=${process.env.FRONTEND_URL}>here</a> to visit frontend.</h1>`
+  )
+);
 app.use(ErrorMiddleware);

@@ -1,9 +1,9 @@
 import express from "express";
-import {registeradmin,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateadminprofilepicture} from "../controllers/adminController.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateadminprofilepicture} from "../controllers/adminController.js";
+import {isAuthenticated } from "../middlewares/auth.js";
 import { singleUpload } from "../middlewares/multer.js";
 const router = express.Router();
-router.route("/registeradmin").post(singleUpload,registeradmin);
+router.route("/registeradmin").post(singleUpload,registerUser);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
 router.route("/myprofile").get(isAuthenticated,getMyProfile);

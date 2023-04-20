@@ -113,10 +113,9 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
       message: "Store Images  Updated Successfully",
     });
   });
-
-  //create review by user and access to both admin and user 
-  export const createStoreReview = catchAsyncError(async (req, res, next) => {
-    const {rating, comment, StoreId } = req.body;
+//user store reviews 
+  export const createStoreReviews = catchAsyncError(async (req, res, next) => {
+    const { rating, comment, StoreId } = req.body;
     const review = {
       user: req.user._id,
       name: req.user.name,
@@ -127,6 +126,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
     const isReviewed = store.reviews.find(
       (rev) => rev.user.toString() === req.user._id.toString()
     );
+  
     if (isReviewed) {
       store.reviews.forEach((rev) => {
         if (rev.user.toString() === req.user._id.toString())
@@ -151,30 +151,28 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
       success: true,
     });
   });
-
-
-  //get store review by admin
+  
+  // Get All Reviews of a product
   export const getStoreReview = catchAsyncError(async (req, res, next) => {
     const store = await Store.findById(req.query.id);
+  
     if (!store) {
-      return next(new ErrorHandler("Store not found", 404));
+      return next(new ErrorHander("Store not found", 404));
     }
     res.status(200).json({
       success: true,
       reviews: store.reviews,
     });
   });
-
-
-//delete review by user
+  
+  // Delete Review
   export const deleteReview = catchAsyncError(async (req, res, next) => {
-    const product = await Product.findById(req.query.productId);
+    const store = await Store.findById(req.query.StoreId);
   
-    if (!product) {
-      return next(new ErrorHander("Product not found", 404));
+    if (!store) {
+      return next(new ErrorHander("Store not found", 404));
     }
-  
-    const reviews = product.reviews.filter(
+    const reviews = store.reviews.filter(
       (rev) => rev._id.toString() !== req.query.id.toString()
     );
   
@@ -194,8 +192,8 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
   
     const numOfReviews = reviews.length;
   
-    await Product.findByIdAndUpdate(
-      req.query.productId,
+    await Store.findByIdAndUpdate(
+      req.query.StoreId,
       {
         reviews,
         ratings,
@@ -212,4 +210,3 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
       success: true,
     });
   });
-  
