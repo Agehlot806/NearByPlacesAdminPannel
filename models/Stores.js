@@ -56,8 +56,8 @@ const schema = new mongoose.Schema({
       reviews: [
         {
           user: {
-            type: mongoose.Schema.ObjectId,
-            ref: "Admin",
+            type:mongoose.Schema.ObjectId,
+            ref: "User",
             required: true,
           },
           name: {
@@ -80,6 +80,7 @@ const schema = new mongoose.Schema({
     address:{
         type:String,
     },
+
 
     CreatedAt:{
         type:Date,
