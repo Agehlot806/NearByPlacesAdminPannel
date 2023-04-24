@@ -23,19 +23,29 @@ const schema = new mongoose.Schema({
     type:String,
     required:true,
   },
-  couponConfig:[
-    {
-        coupon_type:{
-            type:String,
+  // couponConfig:[
+  //   {
+  //       coupon_type:{
+  //           type:String,
+  //       },
+  //       value:{
+  //           type:Number
+  //       },
+  //       coupon_code:{
+  //           type:String,
+  //       }
+  //   }
+  // ],
+
+  coupon_type:{
+    type:String,
+  },
+  value:{
+          type:Number
+         },
+         coupon_code:{
+               type:String,
         },
-        value:{
-            type:Number
-        },
-        coupon_code:{
-            type:String,
-        }
-    }
-  ],
   makeAdeal:[
     {
       datebegin:{

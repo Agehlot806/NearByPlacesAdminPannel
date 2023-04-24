@@ -7,8 +7,8 @@ import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 
 export const AddnewOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,couponConfig,makeAdeal} = req.body;
-    if (!name||!PricingOfferValue||!couponConfig)
+    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,makeAdeal} = req.body;
+    if (!name||!PricingOfferValue||!coupon_code||!coupon_type||!value)
       return next(new ErrorHandler("Please enter all field", 400));
     let offer = await Offer.findOne({name});
     if (offer) return next(new ErrorHandler("Offer Already Exist", 409));
@@ -22,7 +22,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
              }
            }
     offer = await Offer.create({
-        name,description,PricingOfferValue,couponConfig,makeAdeal,offerImage
+        name,description,PricingOfferValue,makeAdeal,offerImage,coupon_code,value,coupon_type
     });  
 
     res.status(201).json({
@@ -65,7 +65,9 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
     if (description) offer.description = description;
     if (PricingOfferValue) offer.PricingOfferValue = PricingOfferValue;
     if (makeAdeal) offer.makeAdeal = makeAdeal;
-    if (couponConfig) offer.couponConfig = couponConfig;
+    if (coupon_code) offer.coupon_code = coupon_code;
+    if (coupon_type) offer.coupon_type = coupon_type;
+    if (value) offer.value = value;
     await offer.save();
     res.status(200).json({
       success: true,

@@ -88,6 +88,6 @@ const schema = new mongoose.Schema({
     },
 });
 
-
+schema.set('strictPopulate', false);
 
 export const Store = mongoose.model("Store",schema);

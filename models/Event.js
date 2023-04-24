@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-    storename:[
-        {type:String}
-    ],
+ 
     eventname:{
         type:String,
         required:true,
@@ -55,5 +53,6 @@ const schema = new mongoose.Schema({
         default:true,
     }
 });
+schema.set('strictPopulate', false);
 
 export const Event = mongoose.model("Event",schema);
