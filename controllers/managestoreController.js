@@ -54,7 +54,14 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
     });
   });
 
-  
+  export const getStoreBYId = catchAsyncError(async (req, res, next) => {
+    const store = await Store.findById(req.params.id);
+    res.status(200).json({
+      success: true,
+      store    
+    });
+  });
+
 export const DeleteStore = catchAsyncError(async (req, res, next) => {
     const store = await Store.findById(req.params.id);
     if (!store) return next(new ErrorHandler("Store not found", 404));

@@ -45,3 +45,50 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
       resultPerPage
     });
   });
+
+  export const DeleteOffer = catchAsyncError(async (req, res, next) => {
+    const offer = await Offer.findById(req.params.id);
+    if (!offer) return next(new ErrorHandler("Offer not found", 404));
+    await cloudinary.v2.uploader.destroy(offer.offerImage.public_id);
+    await cloudinary.v2.uploader.destroy(offer.offerImage.public_id);
+   await offer.deleteOne();
+    res.status(200).json({
+      success: true,
+      message: "Offer Deleted Successfully",
+    });
+  });
+
+  export const UpdateOffer = catchAsyncError(async (req, res, next) => {
+    const {name,description,PricingOfferValue,couponConfig,makeAdeal} = req.body;
+    const offer = await Offer.findById(req.params.id);
+    if (name) offer.name = name;
+    if (description) offer.description = description;
+    if (PricingOfferValue) offer.PricingOfferValue = PricingOfferValue;
+    if (makeAdeal) offer.makeAdeal = makeAdeal;
+    if (couponConfig) offer.couponConfig = couponConfig;
+    await offer.save();
+    res.status(200).json({
+      success: true,
+      message: "Offer Updated Successfully",
+      offer
+    });
+  });
+
+
+  export const UpdateOfferImage= catchAsyncError(async (req, res, next) => {
+    const offer = await Offer.findById(req.params.id);
+    if(req.file){
+      const file = getDataUri(req.file);
+      await cloudinary.v2.uploader.destroy(offer.offerImage.public_id);
+      const mycloud = await cloudinary.v2.uploader.upload(file.content);
+      offer.offerImage ={
+        public_id:mycloud.public_id,
+        url:mycloud.secure_url,
+      }
+      }
+    await offer.save();
+    res.status(200).json({
+      success: true,
+      message: "Offer Image Successfully",
+    });
+  });

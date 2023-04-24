@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
+
+
+  name:{
+    type:String
+  },
     description:{
         type:String,
         // required:true,
@@ -31,10 +36,18 @@ const schema = new mongoose.Schema({
         }
     }
   ],
-  makeAdeal:{
-    type:Date,
-    default:Date.now
-  },
+  makeAdeal:[
+    {
+      datebegin:{
+        type:Date,
+        default:Date.now,
+      },
+      dateend:{
+        type:Date,
+        default:Date.now,
+      }
+    }
+  ],
     CreatedAt:{
         type:Date,
         default:Date.now,
