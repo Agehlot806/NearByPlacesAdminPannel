@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
+
+    storeId:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        ref:"Store"
+
+    },
  
     eventname:{
         type:String,
@@ -53,6 +60,6 @@ const schema = new mongoose.Schema({
         default:true,
     }
 });
-schema.set('strictPopulate', false);
+// schema.set('strictPopulate', false);
 
 export const Event = mongoose.model("Event",schema);

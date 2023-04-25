@@ -55,10 +55,10 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
   });
 
   export const getStoreBYId = catchAsyncError(async (req, res, next) => {
-    const store = await Store.findById(req.params.id);
+    const stores = await Store.findById(req.params.id);
     res.status(200).json({
       success: true,
-      store    
+      stores   
     });
   });
 

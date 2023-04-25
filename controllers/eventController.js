@@ -5,15 +5,16 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
+import mongoose from "mongoose";
 
 export const AddnewEvent = catchAsyncError(async (req, res, next) => {
-    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status} = req.body;
+    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
     if (!eventname||!address||!phonenumber)
       return next(new ErrorHandler("Please enter all field", 400));
-    let store = await Store.findById(req.body.id);
-    console.log(store.name);
+    // let store = await Store.findById(req.body.id);
+    // console.log(store.name);
     let event = await Event.findOne({eventname});
-    event.storename.store.push(store.name)
+    // event.storename.store.push(store.name)
     if (event) return next(new ErrorHandler("Event Already Exist", 409));
     let EventPhoto = undefined;
         if(req.file){
@@ -24,13 +25,31 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
                url:mycloud.secure_url,
              }
            }
-    event = await Event.create({
-        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status
-    });  
+    const eventobj = {
+        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId: new mongoose.Types.ObjectId(storeId)
+    }
+    const eventNewObject = new Event(eventobj);
+   let finalevent = await eventNewObject.save();
+//    console.log(finalevent);
+   let currevent = await Event.aggregate([
+     {
+        $match:{_id:new mongoose.Types.ObjectId(finalevent.id)}
+     },
+     {
+        $lookup:{
+            from:"stores",
+            localField:"storeId",
+            foreignField:"_id",
+            as:"store"
+        }
+     }
+   ])
+//    console.log(currevent);
     res.status(201).json({
       success:true,
       message:"Evenet created successfully",
-      event
+    //   eventobj
+    currevent
     })
   });
 
@@ -68,7 +87,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
   });
 
   export const UpdateEvent = catchAsyncError(async (req, res, next) => {
-    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status} = req.body;
+    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
     const events = await Event.findById(req.params.id);
     if (eventname) events.eventname = eventname;
     if (description) events.description = description;
@@ -79,6 +98,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
     if (location) events.location = location;
     if (address) events.address = address;
     if (status) events.status = status;
+    if(storeId) events.storeId = storeId;
     await events.save();
     res.status(200).json({
       success: true,

@@ -59,7 +59,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
   });
 
   export const UpdateOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,couponConfig,makeAdeal} = req.body;
+    const {name,description,PricingOfferValue,coupon_code,value,coupon_type,makeAdeal} = req.body;
     const offer = await Offer.findById(req.params.id);
     if (name) offer.name = name;
     if (description) offer.description = description;
