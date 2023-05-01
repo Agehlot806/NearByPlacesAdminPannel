@@ -34,11 +34,13 @@ import admin from "./routes/userRoutes.js";
 import stores from "./routes/newStoreRoutes.js";
 import offer from "./routes/offerRoutes.js";
 import event from "./routes/eventRoutes.js"
+import messages from "./routes/messgesRoutes.js"
 
 app.use("/api/v1", admin);
 app.use("/api/v1",stores);
 app.use("/api/v1",offer);
 app.use("/api/v1",event);
+app.use("/api/v1",messages)
 
 export default app;
 app.get("/", (req, res) =>

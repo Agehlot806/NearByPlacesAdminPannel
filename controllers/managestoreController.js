@@ -5,7 +5,7 @@ import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
-    const {name,category,phonenumber,website,details,videourl,latitude,longitude} = req.body;
+    const {name,category,phonenumber,website,details,videourl,latitude,longitude,status} = req.body;
     if (!name || !category||!latitude||!longitude||!phonenumber)
     return next(new ErrorHandler("please add all fields",400));
     let store = await Store.findOne({name})
@@ -31,7 +31,7 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
           }
           
     const newstoreobject = {
-        name,category,phonenumber,website,details,videourl,latitude,longitude,storegallery,storephoto }
+        name,category,phonenumber,website,details,videourl,latitude,longitude,storegallery,storephoto,status }
     store = new Store(newstoreobject);
     await store.save()
     res.status(201).json({
@@ -75,7 +75,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
   });
 
   export const UpdateStore = catchAsyncError(async (req, res, next) => {
-    const {name,category,phonenumber,website,details,videourl,latitude,longitude} = req.body;
+    const {name,category,phonenumber,website,details,videourl,latitude,longitude,status} = req.body;
     const store = await Store.findById(req.params.id);
     if (name) store.name = name;
     if (category) store.category = category;
@@ -85,6 +85,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
     if (videourl) store.videourl = videourl;
     if (latitude) store.latitude = latitude;
     if (longitude) store.longitude = longitude;
+    if (status) store.status = status;
     await store.save();
     res.status(200).json({
       success: true,

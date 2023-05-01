@@ -80,6 +80,11 @@ const schema = new mongoose.Schema({
     address:{
         type:String,
     },
+    status:{
+      type:Boolean,
+      default:true,
+  
+    },
 
 
     CreatedAt:{

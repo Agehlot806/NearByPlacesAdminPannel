@@ -139,7 +139,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
       dateend:events.dateend
 
     }
-    console.log(participant)
+    console.log(typeof(participant))
   
     const isParticipated = events.usersparticipated.find(
       (rev) => rev.user.toString() === req.user._id.toString()
@@ -150,7 +150,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
           return next(new ErrorHandler("you already participated to the event"));
       });
     } else {
-    events.usersparticipated.push(participant);
+    events.usersparticipated.push(participant)
     }
     await events.save({ validateBeforeSave: false });
     // await events.save()
