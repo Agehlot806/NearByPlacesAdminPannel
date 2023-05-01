@@ -16,7 +16,24 @@ const schema = new mongoose.Schema({
             name:{
                 type:String,
                 required:true
+            },
+            eventname:{
+                type:String,
+                required:true,
+            },
+            datebegin:{
+                type:Date,
+                required:true,
+            },
+            dateend:{
+                type:Date,
+                required:true,
+            },
+            status:{
+                type:Boolean,
+                required:true,
             }
+          
         }
     ],
 

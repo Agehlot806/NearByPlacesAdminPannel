@@ -128,12 +128,19 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
   
   export const addparticipantToEvent = catchAsyncError(async(req,res,next)=>{
     const {eventId} = req.body;
+    const events = await Event.findById(eventId);
+    // console.log(eventId)
     const participant = {
       user:req.user._id,
-      name:req.user.name
+      name:req.user.name,
+      eventname:events.eventname,
+      staus:events.status,
+      datebegin:events.datebegin,
+      dateend:events.dateend
+
     }
     console.log(participant)
-    const events = await Event.findById(eventId);
+  
     const isParticipated = events.usersparticipated.find(
       (rev) => rev.user.toString() === req.user._id.toString()
     );
@@ -159,9 +166,12 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
     if (!events) {
       return next(new ErrorHandler("Event not found", 404));
     }
+    // console.log(totalEventparticipant)
     res.status(200).json({
       success: true,
       usersparticipated: events.usersparticipated,
+      totalparticipant:events.usersparticipated.length
+  
     });
   });
 
