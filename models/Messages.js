@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-  user:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:"User",
-    required:true,
-            },
-            username:{
-                type:String,
-                required:true,
-            },
-            message:{
-                type:String,
-                required:true
-            }
+
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        requried:true,
+    },
+    username:{
+        type:String,
+        required:true,
+    },
+    message:{
+        type:String,
+    }
+
 
 })
 
-export const Messages = mongoose.model("Messages",schema);
+export const Message  = mongoose.model("Message",schema)
