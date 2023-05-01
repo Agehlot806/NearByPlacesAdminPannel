@@ -1,13 +1,47 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-
     storeId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
         ref:"Store"
-
     },
- 
+
+    usersparticipated:[
+        {
+            user:{
+                type:mongoose.Schema.Types.ObjectId,
+                ref:"User",
+                required:true
+            },
+            name:{
+                type:String,
+                required:true
+            }
+        }
+    ],
+
+    // reviews: [
+    //     {
+    //       user: {
+    //         type: mongoose.Schema.ObjectId,
+    //         ref: "User",
+    //         required: true,
+    //       },
+    //       name: {
+    //         type: String,
+    //         required: true,
+    //       },
+    //       rating: {
+    //         type: Number,
+    //         required: true,
+    //       },
+    //       comment: {
+    //         type: String,
+    //         required: true,
+    //       },
+    //     },
+    //   ],
+
     eventname:{
         type:String,
         required:true,

@@ -6,15 +6,13 @@ import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 import mongoose from "mongoose";
+import { User } from "../models/User.js";
 
 export const AddnewEvent = catchAsyncError(async (req, res, next) => {
     const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
     if (!eventname||!address||!phonenumber)
       return next(new ErrorHandler("Please enter all field", 400));
-    // let store = await Store.findById(req.body.id);
-    // console.log(store.name);
     let event = await Event.findOne({eventname});
-    // event.storename.store.push(store.name)
     if (event) return next(new ErrorHandler("Event Already Exist", 409));
     let EventPhoto = undefined;
         if(req.file){
@@ -25,31 +23,33 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
                url:mycloud.secure_url,
              }
            }
+        
     const eventobj = {
-        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId: new mongoose.Types.ObjectId(storeId)
+        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId
     }
     const eventNewObject = new Event(eventobj);
    let finalevent = await eventNewObject.save();
 //    console.log(finalevent);
-   let currevent = await Event.aggregate([
-     {
-        $match:{_id:new mongoose.Types.ObjectId(finalevent.id)}
-     },
-     {
-        $lookup:{
-            from:"stores",
-            localField:"storeId",
-            foreignField:"_id",
-            as:"store"
-        }
-     }
-   ])
+  //  let currevent = await Event.aggregate([
+  //    {
+  //       $match:{_id:new mongoose.Types.ObjectId(finalevent.id)}
+  //    },
+  //    {
+  //       $lookup:{
+  //           from:"stores",
+  //           localField:"storeId",
+  //           foreignField:"_id",
+  //           as:"store"
+  //       }
+  //    }
+  //  ])
 //    console.log(currevent);
     res.status(201).json({
       success:true,
       message:"Evenet created successfully",
     //   eventobj
-    currevent
+    // currevent
+    finalevent
     })
   });
 
@@ -125,4 +125,75 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
       message: " Event Images  Updated Successfully",
     });
   });
+  
+  export const addparticipantToEvent = catchAsyncError(async(req,res,next)=>{
+    const {eventId} = req.body;
+    const participant = {
+      user:req.user._id,
+      name:req.user.name
+    }
+    console.log(participant)
+    const events = await Event.findById(eventId);
+    const isParticipated = events.usersparticipated.find(
+      (rev) => rev.user.toString() === req.user._id.toString()
+    );
+    if(isParticipated) {
+      events.usersparticipated.forEach((rev) => {
+        if (rev.user.toString() === req.user._id.toString())
+          return next(new ErrorHandler("you already participated to the event"));
+      });
+    } else {
+    events.usersparticipated.push(participant);
+    }
+    await events.save({ validateBeforeSave: false });
+    // await events.save()
+
+  res.status(200).json({
+    success: true,
+  });
+  })
+
+  //get all participant for the event
+  export const getallEventParticipants = catchAsyncError(async (req, res, next) => {
+    const events = await Event.findById(req.query.id);
+    if (!events) {
+      return next(new ErrorHandler("Event not found", 404));
+    }
+    res.status(200).json({
+      success: true,
+      usersparticipated: events.usersparticipated,
+    });
+  });
+
+  //delete user from event 
+  export const deleteparticipantfromEvent = catchAsyncError(async (req, res, next) => {
+    const events = await Event.findById(req.query.eventId);
+    if (!events) {
+      return next(new ErrorHandler("Events not found", 404));
+    }
+    const usersparticipated = events.usersparticipated.filter(
+      (rev) => rev._id.toString() !== req.query.id.toString()
+    );
+
+    await Event.findByIdAndUpdate(
+      req.query.eventId,
+      {
+        usersparticipated,
+        
+      },
+      {
+        new: true,
+        runValidators: true,
+        useFindAndModify: false,
+      }
+    );
+    res.status(200).json({
+      success: true,
+    });
+  });
+
+
+
+
+
   

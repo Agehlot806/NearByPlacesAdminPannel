@@ -7,7 +7,7 @@ import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 
 export const AddnewOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,makeAdeal} = req.body;
+    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,datebegin,dateend} = req.body;
     if (!name||!PricingOfferValue||!coupon_code||!coupon_type||!value)
       return next(new ErrorHandler("Please enter all field", 400));
     let offer = await Offer.findOne({name});
@@ -22,7 +22,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
              }
            }
     offer = await Offer.create({
-        name,description,PricingOfferValue,makeAdeal,offerImage,coupon_code,value,coupon_type
+        name,description,PricingOfferValue,makeAdeal,offerImage,coupon_code,value,coupon_type,datebegin,dateend
     });  
 
     res.status(201).json({

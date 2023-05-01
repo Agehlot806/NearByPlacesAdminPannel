@@ -10,5 +10,6 @@ router.route("/updatestoreimage/:id").put(storeUpload,UpdateStoreProfile);
 router.route("/review").put(isAuthenticated, createStoreReviews);
 router.route("/reviews").get(getStoreReview);
 router.route("/allstores/:id").get(getStoreBYId)
+
 // ResetPassword
 export default router;

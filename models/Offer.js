@@ -46,8 +46,7 @@ const schema = new mongoose.Schema({
          coupon_code:{
                type:String,
         },
-  makeAdeal:[
-    {
+
       datebegin:{
         type:Date,
         default:Date.now,
@@ -56,8 +55,8 @@ const schema = new mongoose.Schema({
         type:Date,
         default:Date.now,
       }
-    }
-  ],
+    
+  ,
     CreatedAt:{
         type:Date,
         default:Date.now,
