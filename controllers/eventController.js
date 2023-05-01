@@ -134,7 +134,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
       user:req.user._id,
       name:req.user.name,
       eventname:events.eventname,
-      staus:events.status,
+      status:events.status,
       datebegin:events.datebegin,
       dateend:events.dateend
 
