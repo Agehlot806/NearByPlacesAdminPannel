@@ -2,12 +2,14 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Message } from "../models/Messages.js";
 export const sendMessage = catchAsyncError(async(req,res,next)=> {
-  let msg = await Message.find()
+  let msg = await Message.findOne({})
   // if(msg) return next(new ErrorHandler("you have already request a message"))
     const usermessage = {
         user:req.user._id,
         username:req.user.name,
-        message:req.body.message
+        message:req.body.message,
+        userimage:req.user.AdminAvatar.url,
+
       }
       console.log(usermessage)
 

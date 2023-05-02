@@ -85,12 +85,15 @@ const schema = new mongoose.Schema({
       default:true,
   
     },
-
-
     CreatedAt:{
         type:Date,
         default:Date.now,
     },
+    tables:{
+      type:[String]
+    }
+      
+    
 });
 
 // schema.set('strictPopulate', false);

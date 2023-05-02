@@ -10,6 +10,10 @@ const schema = new mongoose.Schema({
         type:String,
         required:true,
     },
+    userimage:{
+        type:String,
+        required:true,
+    },
     message:{
         type:String,
     }
