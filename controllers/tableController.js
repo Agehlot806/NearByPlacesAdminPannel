@@ -2,16 +2,27 @@ import { Store } from "../models/Stores.js";
 import { BookingTable } from "../models/BookingTable.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
+// import morgan from "morgan"// console.log(morgan);
+// console.log(ErrorHandler)
 
-export const createTable = async (req, res, next) => {
+export const createTable = async(req, res, next) => {
     const storeId = req.params.storeId;
+    // const table = await BookingTable.findById(req.params.)
+    const bookingUser ={ 
+      user:req.user._id,
+      name:req.user.name,
+      email:req.user.email,
+    }
+    console.log(bookingUser);
     const newTable = new BookingTable(req.body);
     try {
       const savedTable = await newTable.save();
       try {
         await Store.findByIdAndUpdate(storeId, {
         //   $push: { tables: savedTable._id },
-        $push:{tables:savedTable._id}
+        $push:{tables:savedTable._id},
+        $push:{tablebookinguser:bookingUser}
+      
         });
       } catch (err) {
         next(err);
@@ -19,7 +30,6 @@ export const createTable = async (req, res, next) => {
       res.status(200).json({
         sucess:true,
         savedTable,
-
       });
     } catch (err) {
       next(err);
@@ -79,7 +89,6 @@ export const gettable= async (req, res, next) => {
 };
 export const gettables = async (req, res, next) => {
   try {
-    
     const tables = await BookingTable.find();
     const tablescount = await BookingTable.find().countDocuments()
     
@@ -92,5 +101,6 @@ export const gettables = async (req, res, next) => {
     next(err);
   }
 };
+
 
 

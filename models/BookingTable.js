@@ -2,6 +2,26 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema(
   {
+    // bookingUser:[
+    //   {
+    //     user:{
+    //       type:mongoose.Schema.Types.ObjectId,
+    //       ref:"User",
+    //       required:true,
+    //     },
+    //     name:{
+    //       type:String,
+    //     },
+    //     email:{
+    //       type:String,
+
+    //     },
+    //     phonenumber:{
+    //       type:String,
+    //     }
+
+    //   }
+    // ],
     title: {
       type: String,
       required: true,

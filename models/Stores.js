@@ -91,7 +91,30 @@ const schema = new mongoose.Schema({
     },
     tables:{
       type:[String]
-    }
+    },
+    tablebookinguser:[
+        {
+          user:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"User",
+            required:true,
+          },
+          name:{
+            type:String,
+          },
+          email:{
+            type:String,
+  
+          },
+          phonenumber:{
+            type:String,
+          },
+          tablenumber:{
+            type:String,
+          }
+  
+        }
+      ],
       
     
 });
