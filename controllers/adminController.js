@@ -184,7 +184,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       message: "Password Changed Successfully",
     });
   });
-  //update user role api
+  //update user role api || admin and staff controller
   export const updateUserRole = catchAsyncError(async (req, res, next) => {
     const {role}  = req.body;
     const user = await User.findById(req.params.id);
@@ -196,4 +196,16 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       message: "Role Updated",
     });
   });
+
+
+  export const getallusers = catchAsyncError(async (req, res, next) => {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  });
+  
+
+
   
