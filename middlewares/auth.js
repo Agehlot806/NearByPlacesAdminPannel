@@ -30,3 +30,14 @@ export const authorizeAdmin = (req, res, next) => {
     );
   next();
 };
+
+export const specificauth  = (req,res,next)=>{
+  if(req.user.role !== "staff")
+  return next(
+    new ErrorHandler(
+      `${req.user.role} is not allowed to access this resource`,
+      403
+    )
+  )
+  next();
+}

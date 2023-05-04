@@ -184,4 +184,16 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       message: "Password Changed Successfully",
     });
   });
+  //update user role api
+  export const updateUserRole = catchAsyncError(async (req, res, next) => {
+    const {role}  = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return next(new ErrorHandler("User not found", 404));
+    if (role) user.role = role;
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Role Updated",
+    });
+  });
   
