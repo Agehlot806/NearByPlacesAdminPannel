@@ -7,7 +7,7 @@ import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 
 export const AddnewOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,datebegin,dateend} = req.body;
+    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend} = req.body;
     if (!name||!PricingOfferValue||!coupon_code||!coupon_type||!value)
       return next(new ErrorHandler("Please enter all field", 400));
     let offer = await Offer.findOne({name});
@@ -22,7 +22,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
              }
            }
     offer = await Offer.create({
-        name,description,PricingOfferValue,offerImage,coupon_code,value,coupon_type,datebegin,dateend
+        name,description,PricingOfferValue,offerImage,coupon_code,value,coupon_type,datebegin,dateend,status
     });  
 
     res.status(201).json({
@@ -59,7 +59,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
   });
 
   export const UpdateOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,coupon_code,value,coupon_type,makeAdeal} = req.body;
+    const {name,description,PricingOfferValue,coupon_code,value,coupon_type,makeAdeal,status} = req.body;
     const offer = await Offer.findById(req.params.id);
     if (name) offer.name = name;
     if (description) offer.description = description;
@@ -68,6 +68,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
     if (coupon_code) offer.coupon_code = coupon_code;
     if (coupon_type) offer.coupon_type = coupon_type;
     if (value) offer.value = value;
+    if(status) offer.status = status;
     await offer.save();
     res.status(200).json({
       success: true,

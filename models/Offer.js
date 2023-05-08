@@ -54,9 +54,11 @@ const schema = new mongoose.Schema({
       dateend:{
         type:Date,
         default:Date.now,
-      }
-    
-  ,
+      },
+      status:{
+        type:Boolean,
+        default:true
+      },
     CreatedAt:{
         type:Date,
         default:Date.now,
