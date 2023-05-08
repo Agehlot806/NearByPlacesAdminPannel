@@ -193,7 +193,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
     await user.save();
     res.status(200).json({
       success: true,
-      message: "Role Updated",
+      message: `${user.role}`,
     });
   });
 

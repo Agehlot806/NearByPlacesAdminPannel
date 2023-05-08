@@ -7,7 +7,7 @@ const router = express.Router();
 router.route("/createevent").post(singleUpload,AddnewEvent);
 router.route('/allevents').get(isAuthenticated,authorizeAdmin,GetAllEvents);
 router.route("/allevent/:id").get(getEventById);
-router.route("/events/:id").put(isAuthenticated,specificauth,UpdateEvent).delete(isAuthenticated,DeleteEventById);
+router.route("/events/:id").put(isAuthenticated,authorizeAdmin,UpdateEvent).delete(isAuthenticated,authorizeAdmin,DeleteEventById);
 router.route("/updateeventimage/:id").put(singleUpload,UpdateEventImage);
 router.route("/addparticipanttoevent").put(isAuthenticated,addparticipantToEvent);
 router.route("/allparticipant").get(getallEventParticipants);

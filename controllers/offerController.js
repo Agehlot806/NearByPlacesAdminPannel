@@ -22,7 +22,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
              }
            }
     offer = await Offer.create({
-        name,description,PricingOfferValue,makeAdeal,offerImage,coupon_code,value,coupon_type,datebegin,dateend
+        name,description,PricingOfferValue,offerImage,coupon_code,value,coupon_type,datebegin,dateend
     });  
 
     res.status(201).json({
