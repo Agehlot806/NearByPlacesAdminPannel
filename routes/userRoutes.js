@@ -15,7 +15,8 @@ router.route("/testapi").get(testapi);
 // ResetPassword
 router.route("/resetpassword/:token").put(resetPassword);
 router.route("/updateuserrole/:id").put(isAuthenticated,authorizeAdmin,updateUserRole);
-router.route("/getallusers").get(getallusers)
+router.route("/getallusers").get(getallusers);
+
 
 
 export default router; 

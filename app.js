@@ -36,6 +36,7 @@ import offer from "./routes/offerRoutes.js";
 import event from "./routes/eventRoutes.js"
 import messages from "./routes/messgesRoutes.js"
 import table from "./routes/tableRoutes.js"
+import csvData from "./routes/csvdataRoutes.js"
 
 app.use("/api/v1", admin);
 app.use("/api/v1",stores);
@@ -43,6 +44,7 @@ app.use("/api/v1",offer);
 app.use("/api/v1",event);
 app.use("/api/v1",messages);
 app.use("/api/v1",table);
+app.use("/api/v1",csvData);
 
 export default app;
 app.get("/", (req, res) =>

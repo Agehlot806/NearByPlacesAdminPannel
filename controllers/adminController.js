@@ -6,6 +6,13 @@ import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto"
+// // import csv from  "csv-parser";
+// import csv from "csvtojson";
+// import {csvParser,Parser} from "json2csv";
+// import axios from "axios";
+// import csvParser from "csv-parser";
+
+// const csvparser = require("json2csv").Parser
 
 export const registerUser = catchAsyncError(async (req, res, next) => {
     const {email, password ,name} = req.body;
@@ -205,7 +212,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       users,
     });
   });
-  
+
 
 
   
