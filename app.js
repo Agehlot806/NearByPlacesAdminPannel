@@ -37,6 +37,7 @@ import event from "./routes/eventRoutes.js"
 import messages from "./routes/messgesRoutes.js"
 import table from "./routes/tableRoutes.js"
 import csvData from "./routes/csvdataRoutes.js"
+import payment from "./routes/paymentRoutes.js"
 
 app.use("/api/v1", admin);
 app.use("/api/v1",stores);
@@ -45,6 +46,11 @@ app.use("/api/v1",event);
 app.use("/api/v1",messages);
 app.use("/api/v1",table);
 app.use("/api/v1",csvData);
+app.use("/api/v1",payment);
+
+app.get("/api/v1/getkey", (req, res) =>
+  res.status(200).json({ key: process.env.RAZORPAY_API_KEY })
+);
 
 export default app;
 app.get("/", (req, res) =>
