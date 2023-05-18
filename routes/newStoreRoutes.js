@@ -1,5 +1,5 @@
 import express from "express";
-import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, UpdateStoreProfile, createStoreReviews, getStoreReview,deleteReview, getStoreBYId } from "../controllers/managestoreController.js";
+import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, UpdateStoreProfile, createStoreReviews, getStoreReview,deleteReview, getStoreBYId ,getlistingbyowner} from "../controllers/managestoreController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 import { storeUpload } from "../middlewares/multer.js";
 const router = express.Router();
@@ -10,6 +10,7 @@ router.route("/updatestoreimage/:id").put(storeUpload,UpdateStoreProfile);
 router.route("/review").put(isAuthenticated, createStoreReviews);
 router.route("/reviews").get(getStoreReview);
 router.route("/allstores/:id").get(getStoreBYId)
+router.route("/getownerstore").get(getlistingbyowner)
 
 // ResetPassword
 export default router;

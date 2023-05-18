@@ -1,6 +1,7 @@
 import express from "express";
 import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateadminprofilepicture, updateUserRole, getallusers} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
+// import { uploadImage } from "../middlewares/multer.js";
 import { singleUpload } from "../middlewares/multer.js";
 const router = express.Router();
 router.route("/registeradmin").post(singleUpload,registerUser);
