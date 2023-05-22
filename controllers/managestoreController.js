@@ -223,11 +223,4 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
   });
 
 
-
-//mange owner category id and listing 
-
-export const getlistingbyowner = catchAsyncError(async (req, res, next) => {
-  const ownerid = req.body;
-  const store = await Store.findById(req.params.id);
-  
-});
+//

@@ -38,6 +38,7 @@ import messages from "./routes/messgesRoutes.js"
 import table from "./routes/tableRoutes.js"
 import csvData from "./routes/csvdataRoutes.js"
 import payment from "./routes/paymentRoutes.js"
+import application from "./routes/applicationRoutes.js"
 
 
 app.use("/api/v1", admin);
@@ -48,6 +49,7 @@ app.use("/api/v1",messages);
 app.use("/api/v1",table);
 app.use("/api/v1",csvData);
 app.use("/api/v1",payment);
+app.use("/api/v1",application);
 
 
 

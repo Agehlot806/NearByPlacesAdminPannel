@@ -139,8 +139,7 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
       dateend:events.dateend
 
     }
-    console.log(typeof(participant))
-  
+    console.log(typeof(participant));
     const isParticipated = events.usersparticipated.find(
       (rev) => rev.user.toString() === req.user._id.toString()
     );

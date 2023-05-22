@@ -2,6 +2,8 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 export const singleUpload = multer({ storage }).single("file");
 export const storeUpload = multer({storage}).fields([{name:'storegalleryfiles',maxCount:10},{name:'storephotofiles',maxCount:10}]);
+export const categoryUpload = multer({storage}).fields([{name:"categoryimagefile",maxCount:2},{name:"categoryiconfile",maxCount:2}]);
+
 
 
 //aws s3 info 
