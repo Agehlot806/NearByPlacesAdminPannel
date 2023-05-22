@@ -52,3 +52,35 @@ export const getAllCategory = catchAsyncError(async(req,res,next)=>{
         category
     })
 })
+
+export const DeleteCategory = catchAsyncError(async(req,res,next)=>{
+    const category = await Category.findById(req.params.id);
+    if(!category)return next(new ErrorHandler("category not found",404));
+    await cloudinary.v2.uploader.destroy(category.categoryImage.public_id);
+    await cloudinary.v2.uploader.destroy(category.categoryIcon.public_id);
+    await category.deleteOne();
+     res.status(200).json({
+       success: true,
+       message: "category Deleted Successfully",
+     });
+
+})
+
+export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
+    const category = await Category.findById(req.params.id);
+    res.status(200).json( {
+        success:true,
+        category,
+    })
+})
+
+export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
+    const {categoryname} = req.body;
+    const category = await Category.findById(req.params.id);
+    if(categoryname) category.categoryname = categoryname;
+    res.status(200).json({
+        success:true,
+        message:"category updated successfully",
+        category
+    })
+})
