@@ -1,8 +1,7 @@
 import express from "express";
-import { getallmessages, sendMessage } from "../controllers/messageController.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+import {sendMessage,replyingMessage} from "../controllers/messageController.js";
 const router = express.Router();
-router.route("/sendmessage").post(isAuthenticated,sendMessage);
-router.route("/getallmessages").get(getallmessages);
 
+router.route("/sendmessage").post(sendMessage);
+router.route("/messages/:id/reply").post(replyingMessage);
 export default router;

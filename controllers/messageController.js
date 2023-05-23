@@ -1,31 +1,64 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Message } from "../models/Messages.js";
+import { User } from "../models/User.js";
 export const sendMessage = catchAsyncError(async(req,res,next)=> {
-  let msg = await Message.findOne({})
-  // if(msg) return next(new ErrorHandler("you have already request a message"))
-    const usermessage = {
-        user:req.user._id,
-        username:req.user.name,
-        message:req.body.message,
-        userimage:req.user.AdminAvatar.url,
+  const { sender, recipient, content } = req.body;
 
-      }
-      console.log(usermessage)
+  // Check if the sender and recipient are valid users
+  const senderUser = await User.findById(sender);
+  const recipientUser = await User.findById(recipient);
 
-    msg = await Message.create(usermessage)
-  
-    res.status(200).json({
-      success: true,
-      msg,
-    });
+  if (!senderUser || !recipientUser) {
+    return next(new ErrorHandler("cannot fin sender and receiver"));
+  }
+
+  const message = new Message({
+    sender,
+    senderName: senderUser.name,
+    recipient,
+    recipientName: recipientUser.name,
+    content
+  });
+  console.log(message);
+  await message.save();
+  res.status(201).json({
+    success:true,
+    message:"message sent successfully",
+    senderUser,
+    recipientUser,
+    content
+  })
 
 })
+export const replyingMessage = catchAsyncError(async(req,res,next)=>{
+  const { id } = req.params;
+  const { sender, content } = req.body;
+  // console.log(id,sender,content)
+  // Check if the sender is a valid user
+  const senderUser = await User.findById(sender);
+  if (!senderUser) {
+    return next(new ErrorHandler("sender user not found"));
+  }
 
-export const getallmessages = catchAsyncError(async(req,res,next)=>{
-    const msg = await Message.find({});
-    res.status(200).json({
-        success:true,
-        msg
-    })
+  const message = await Message.findById(id);
+  if (!message) {
+    return next(new ErrorHandler("message not found"));
+  }
+
+  const reply = {
+    sender,
+    senderName: senderUser.name,
+    content
+  };
+  console.log(reply)
+message.replies.push(reply)
+  await message.save();
+
+
+  res.status(201).json({
+    success:true,
+    message:"message replied successfull",
+    message
+  })
 })
