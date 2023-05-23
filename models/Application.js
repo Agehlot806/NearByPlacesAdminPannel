@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 const schema = new mongoose.Schema({
     categoryname:{
         type:String,
+        store: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Store' }],
         required:true,
     },
     categoryImage:{
@@ -23,7 +24,8 @@ const schema = new mongoose.Schema({
             type:String,
             required:true,
         }
-    }
+    },
+    stores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Store' }]
 })
 
 export const Category = mongoose.model("Category",schema);

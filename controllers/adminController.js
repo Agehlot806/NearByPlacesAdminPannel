@@ -82,10 +82,12 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
   });
 
   export const testapi = catchAsyncError(async (req, res, next) => {
+    const userId = await User.findById(req.body.userId);
+    await userId.save();
     res.status(200).json({
-      success: true,
-      message:"testapi"
-    });
+      success:true,
+
+    })
   });
 
   export const updatePassword = catchAsyncError(async (req, res, next) => {

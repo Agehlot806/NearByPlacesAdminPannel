@@ -67,7 +67,7 @@ export const DeleteCategory = catchAsyncError(async(req,res,next)=>{
 })
 
 export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
-    const category = await Category.findById(req.params.id);
+    const category = await Category.findById(req.params.categoryId);
     res.status(200).json( {
         success:true,
         category,
@@ -78,6 +78,7 @@ export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
     const {categoryname} = req.body;
     const category = await Category.findById(req.params.id);
     if(categoryname) category.categoryname = categoryname;
+    await category.save();
     res.status(200).json({
         success:true,
         message:"category updated successfully",

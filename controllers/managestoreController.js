@@ -4,13 +4,16 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
+import { Category } from "../models/Application.js";
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
-    const {name,category,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
-    if (!name || !category||!latitude||!longitude||!phonenumber)
+    const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
+    if (!name||!latitude||!longitude||!phonenumber)
     return next(new ErrorHandler("please add all fields",400));
     let store = await Store.findOne({name})
     if(store)
     return next(new ErrorHandler("store already registerd",409));
+    const {categoryId} = req.params;
+
         let storegallery =undefined;
         let storephoto = undefined;
         if(req.files['storegalleryfiles'][0]){
@@ -29,10 +32,12 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
               url:mycloud.secure_url,
             }
           }
-          
+            
     const newstoreobject = {
-        name,category,phonenumber,website,details,videourl,latitude,longitude,storegallery,storephoto,status,storeownername }
+        name,phonenumber,website,details,videourl,latitude,longitude,storegallery,storephoto,status,storeownername,category:categoryId};
+     
     store = new Store(newstoreobject);
+    await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true})
     await store.save()
     res.status(201).json({
       success: true,
@@ -44,7 +49,7 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
   export const GetAllStores  = catchAsyncError(async (req, res, next) => {
     const resultPerPage =5;
     const storeCount = await Store.countDocuments();
-    const apiFeature = new ApiFeatures(Store.find(),req.query).search().filter().pagination(resultPerPage);
+    const apiFeature = new ApiFeatures(Store.find().populate("category","categoryname"),req.query).search().filter().pagination(resultPerPage);
     let stores = await apiFeature.query;
     res.status(200).json({
       success: true,

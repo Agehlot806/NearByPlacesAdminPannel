@@ -12,7 +12,7 @@ router.route("/updateadminpassword").put(isAuthenticated,updatePassword);
 router.route("/updateadminprofile").put(isAuthenticated,updateProfile);
 router.route("/updateadminprofilepicture/:id").put(singleUpload,isAuthenticated,updateadminprofilepicture);
 router.route("/forgetpassword").post(forgetPassword);
-router.route("/testapi").get(testapi);
+router.route("/testapi").post(testapi);
 // ResetPassword
 router.route("/resetpassword/:token").put(resetPassword);
 router.route("/updateuserrole/:id").put(isAuthenticated,authorizeAdmin,updateUserRole);

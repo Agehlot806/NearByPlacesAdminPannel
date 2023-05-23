@@ -37,6 +37,9 @@ const schema = new mongoose.Schema({
             required:true
         }
     },
+    testapidata:{
+      type:String
+    },
 
     CreatedAt:{
         type:Date,
