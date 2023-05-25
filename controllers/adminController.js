@@ -109,14 +109,12 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
         updates.adminavatar = photoUrlValue;
       }
       try{
-        const user = await User.findById(userId);
-        console.log(user)
-        
+        const user = await User.findById(userId);        
         if(!user)
         return next(new ErrorHandler("user not found"));
         if (updates.adminavatar && user.adminavatar) {
           await deleteFromS3(user.adminavatar);
-          console.log(deleteFromS3)
+        }
           Object.assign(user, updates);
           await user.save();
           res.status(200).json({
@@ -124,7 +122,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
             message:"profile update successfully",
             user,
           })
-        }
+        
       }catch(err){
         res.status(500).json({
           success:false,

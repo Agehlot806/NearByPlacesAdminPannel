@@ -1,56 +1,29 @@
 import { Event } from "../models/Event.js";
-import { Store } from "../models/Stores.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
-import cloudinary from "cloudinary";
-import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
-import mongoose from "mongoose";
-import { User } from "../models/User.js";
+import deleteFromS3, { eventuplaod } from "../middlewares/multer.js";
 
 export const AddnewEvent = catchAsyncError(async (req, res, next) => {
+  eventuplaod(req,res,async(err)=>{
+    if(err)
+    return next(new ErrorHandler("failed to upload event image try again later"));
     const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId,EventType} = req.body;
-    if (!eventname||!address||!phonenumber||!EventType)
-      return next(new ErrorHandler("Please enter all field", 400));
+    if(!eventname||!address||!phonenumber||!EventType)
+    return next(new ErrorHandler("please add all fields",400))
     let event = await Event.findOne({eventname});
-    if (event) return next(new ErrorHandler("Event Already Exist", 409));
-    let EventPhoto = undefined;
-        if(req.file){
-            const file = getDataUri(req.file);
-             const mycloud = await cloudinary.v2.uploader.upload(file.content);
-             EventPhoto ={
-               public_id:mycloud.public_id,
-               url:mycloud.secure_url,
-             }
-           }
-        
-    const eventobj = {
-        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId,EventType
-    }
-    const eventNewObject = new Event(eventobj);
-   let finalevent = await eventNewObject.save();
-//    console.log(finalevent);
-  //  let currevent = await Event.aggregate([
-  //    {
-  //       $match:{_id:new mongoose.Types.ObjectId(finalevent.id)}
-  //    },
-  //    {
-  //       $lookup:{
-  //           from:"stores",
-  //           localField:"storeId",
-  //           foreignField:"_id",
-  //           as:"store"
-  //       }
-  //    }
-  //  ])
-//    console.log(currevent);
+    if(event)
+    return next(new ErrorHandler("Event already Exists",409));
+    const eventimagevalue = req.file.location;
+    event = await Event.create({
+      eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId,EventType,eventimage:eventimagevalue
+    })
     res.status(201).json({
       success:true,
-      message:"Evenet created successfully",
-    //   eventobj
-    // currevent
-    finalevent
+      message:"event created successfully",
+      event
     })
+  })
   });
 
   export const GetAllEvents  = catchAsyncError(async (req, res, next) => {
@@ -74,60 +47,74 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
     });
   });
 
-export const DeleteEventById = catchAsyncError(async (req, res, next) => {
-    const events = await Event.findById(req.params.id);
-    if (!events) return next(new ErrorHandler("Event not found", 404));
-    await cloudinary.v2.uploader.destroy(events.EventPhoto.public_id);
-    await cloudinary.v2.uploader.destroy(events.EventPhoto.public_id);
-   await events.deleteOne();
-    res.status(200).json({
-      success: true,
-      message: "Event Deleted Successfully",
-    });
+  export const DeleteEventById = catchAsyncError(async (req, res, next) => {
+    const eventId = req.params.id; 
+    try {
+      const event = await Event.findById(eventId);
+  
+      if (!event) {
+        return next(new ErrorHandler("Event not found", 404));
+      }
+      await event.deleteOne();
+  
+      res.status(200).json({
+        success: true,
+        message: "Event Deleted Successfully",
+      });
+    } catch (error) {
+      next(new ErrorHandler("Failed to delete event", 500));
+    }
   });
 
   export const UpdateEvent = catchAsyncError(async (req, res, next) => {
-    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
-    const events = await Event.findById(req.params.id);
-    if (eventname) events.eventname = eventname;
-    if (description) events.description = description;
-    if (datebegin) events.datebegin = datebegin;
-    if (website) events.website = website;
-    if (dateend) events.dateend = dateend;
-    if (phonenumber) events.phonenumber = phonenumber;
-    if (location) events.location = location;
-    if (address) events.address = address;
-    if (status) events.status = status;
-    if(storeId) events.storeId = storeId;
-    await events.save();
-    res.status(200).json({
-      success: true,
-      message: "Events Updated Successfully",
-      events
-    });
-  });
+    const eventId = req.params.id;
+    eventuplaod(req,res,async(err)=>{
+      if (err)
+        return next(new ErrorHandler("failed to update image"));
+        const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
+        const updates = {};
+        if(eventname) updates.eventname = eventname;
+        if(description) updates.description = description;
+        if(datebegin) updates.datebegin  =datebegin;
+        if(dateend) updates.dateend = dateend;
+        if(phonenumber) updates.phonenumber =phonenumber;
+        if(website) updates.website = website;
+        if(location) updates.location = location;
+        if(address) updates.address = address;
+        if(status) updates.status = status;
+        if(storeId) updates.storeId = storeId;
+        if(req.file){
+          const eventurlValue =req.file.location;
+          updates.eventimage = eventurlValue;
+        }
+        try{
+          const event = await Event.findById(eventId);
+          if(!event)
+          return next(new ErrorHandler("event not found"));
+          if (updates.eventimage && event.eventimage) {
+            await deleteFromS3(event.eventimage);
+          }
+          Object.assign(event, updates);
+          await event.save();
+          res.status(200).json({
+            success:true,
+            message:"Event updated successfully",
+            event
+          })
 
-
-  export const UpdateEventImage= catchAsyncError(async (req, res, next) => {
-    const events = await Event.findById(req.params.id);
-    if(req.file){
-    const file = getDataUri(req.file);
-    await cloudinary.v2.uploader.destroy(events.EventPhoto.public_id);
-    const mycloud = await cloudinary.v2.uploader.upload(file.content);
-    events.EventPhoto ={
-      public_id:mycloud.public_id,
-      url:mycloud.secure_url,
-    }
-    }
-    await events.save();
-    res.status(200).json({
-      success: true,
-      message: " Event Images  Updated Successfully",
-    });
+        }
+        catch(err){
+          res.status(500).json({
+            success:false,
+            message:"failed to update profile",
+            error:err.message,
+          })
+        }
+    })
   });
   
   export const addparticipantToEvent = catchAsyncError(async(req,res,next)=>{
-    const {eventId} = req.body;
+    const {eventId,ticketCount} = req.body;
     const events = await Event.findById(eventId);
     // console.log(eventId)
     const participant = {
@@ -136,10 +123,10 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
       eventname:events.eventname,
       status:events.status,
       datebegin:events.datebegin,
-      dateend:events.dateend
+      dateend:events.dateend,
+      ticketCount:ticketCount || 1
 
     }
-    console.log(typeof(participant));
     const isParticipated = events.usersparticipated.find(
       (rev) => rev.user.toString() === req.user._id.toString()
     );
@@ -152,8 +139,6 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
     events.usersparticipated.push(participant)
     }
     await events.save({ validateBeforeSave: false });
-    // await events.save()
-
   res.status(200).json({
     success: true,
   });

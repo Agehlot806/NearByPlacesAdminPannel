@@ -31,6 +31,7 @@ const upload = (bucketName) =>
     }),
   });
   export const uploadsingle = upload("bookmyplaceimagebucket").single("adminavatar");
+  export const eventuplaod = upload("bookmyplaceimagebucket").single("eventimage")
 
 const deleteFromS3 = async (url) => {
   const s3 = new aws.S3({

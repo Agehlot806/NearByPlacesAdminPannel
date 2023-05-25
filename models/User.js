@@ -26,17 +26,6 @@ const schema = new mongoose.Schema({
     enum: ["admin","user","staff"],
     default: "user",
   },
-
-    // AdminAvatar:{
-    //     public_id:{
-    //         type:String,
-    //         required:true,
-    //     },
-    //     url:{
-    //         type:String,
-    //         required:true
-    //     }
-    // },
     adminavatar:{
       type:String
     },

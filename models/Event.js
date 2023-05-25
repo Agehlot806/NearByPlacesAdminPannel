@@ -32,32 +32,13 @@ const schema = new mongoose.Schema({
             status:{
                 type:Boolean,
                 // required:true,
+            },
+            ticketCount:{
+                type:Number
             }
           
         }
     ],
-
-    // reviews: [
-    //     {
-    //       user: {
-    //         type: mongoose.Schema.ObjectId,
-    //         ref: "User",
-    //         required: true,
-    //       },
-    //       name: {
-    //         type: String,
-    //         required: true,
-    //       },
-    //       rating: {
-    //         type: Number,
-    //         required: true,
-    //       },
-    //       comment: {
-    //         type: String,
-    //         required: true,
-    //       },
-    //     },
-    //   ],
 
     eventname:{
         type:String,
@@ -74,18 +55,11 @@ const schema = new mongoose.Schema({
     dateend:{
         type:Date,
         default:Date.now,
-    }
-    ,
-    EventPhoto:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
     },
+    eventimage:{
+        type:String,
+    },
+    
   phonenumber:{
     type:Number,
   },
@@ -115,6 +89,4 @@ const schema = new mongoose.Schema({
         enum:["Paid","Unpaid"],
     }
 });
-// schema.set('strictPopulate', false);
-
 export const Event = mongoose.model("Event",schema);
