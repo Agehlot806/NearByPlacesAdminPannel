@@ -109,6 +109,10 @@ const schema = new mongoose.Schema({
     status:{
         type:Boolean,
         default:true,
+    },
+    EventType:{
+        type:String,
+        enum:["Paid","Unpaid"],
     }
 });
 // schema.set('strictPopulate', false);

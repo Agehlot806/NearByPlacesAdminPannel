@@ -2,49 +2,33 @@ import { User } from "../models/User.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import { sendToken } from "../utils/sendToken.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
-import cloudinary from "cloudinary";
-import getDataUri from "../utils/dataUri.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto"
-// // import csv from  "csv-parser";
-// import csv from "csvtojson";
-// import {csvParser,Parser} from "json2csv";
-// import axios from "axios";
-// import csvParser from "csv-parser";
-
-// const csvparser = require("json2csv").Parser
-
+import { uploadsingle } from "../middlewares/multer.js";
+import deleteFromS3 from "../middlewares/multer.js";
 export const registerUser = catchAsyncError(async (req, res, next) => {
-    const {email, password ,name} = req.body;
-    if (!email || !password||!name)
-      return next(new ErrorHandler("Please enter all field", 400));
-    let user = await User.findOne({ email });
-    if (user) return next(new ErrorHandler("Admin Already Exist", 409));
-    let AdminAvatar = undefined;
-        if(req.file){
-            const file = getDataUri(req.file);
-             const mycloud = await cloudinary.v2.uploader.upload(file.content);
-             AdminAvatar ={
-               public_id:mycloud.public_id,
-               url:mycloud.secure_url,
-             }
-           }
-    user = await User.create({
-      email,
-      password,
-      name,
-      AdminAvatar,
+    uploadsingle(req, res, async (err) => {
+      if (err)
+        return next(new ErrorHandler("failed to upload image try again later"))
+        const{name,email,password,} = req.body;
+        if(!name||!email||!password)
+        return next(new ErrorHandler("Please enter all field", 400));
+        let user = await User.findOne({ email });
+        if (user) return next(new ErrorHandler("Admin Already Exist", 409));
+        const adminavatarvalue = req.file.location;
+   user = await User.create({
+       name,
+        email,
+        password,
+        adminavatar: adminavatarvalue,
+      })
+        sendToken(res, user, `${user.role} added Successfully`, 201);
     });
-
-    sendToken(res, user, "Admin added Successfully", 201);
-    
-
   });
 
 
   export const login = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
-
     if (!email || !password)
       return next(new ErrorHandler("Please enter all field", 400));
   
@@ -58,18 +42,19 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
     sendToken(res, user, `Welcome back, ${user.email}`, 200);
   });
   
+
   export const logout = catchAsyncError(async (req, res, next) => {
     res
       .status(200)
       .cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
-        secure: true,  
+        // secure: true,  
         sameSite: "none",
       })
       .json({
         success: true,
-        message: "Logged Out Successfully",
+        message: `Logged Out Successfully`,
       });
   });
 
@@ -102,44 +87,53 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
     await user.save();
     res.status(200).json({
       success: true,
-      message: "password update Successfully",
+      message: `${user.name} , password update Successfully`,
     });
   });
 
   export const updateProfile = catchAsyncError(async (req, res, next) => {
-    const {email,name } = req.body;
-  
-    const user = await User.findById(req.user._id);
-
-    if (email) user.email = email;
-    if (name) user.name = name;
-  
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Profile Updated Successfully",
+      const userId = req.params.id;
+    uploadsingle(req, res, async (err) => {
+      if (err)
+        return next(new ErrorHandler("failed to update image"))
+      const {name,email} = req.body;
+      const updates = {};
+      if (name) {
+        updates.name = name;
+      }
+      if (email) {
+        updates.email = email;
+      }
+      if (req.file) {
+        const photoUrlValue = req.file.location;
+        updates.adminavatar = photoUrlValue;
+      }
+      try{
+        const user = await User.findById(userId);
+        console.log(user)
+        
+        if(!user)
+        return next(new ErrorHandler("user not found"));
+        if (updates.adminavatar && user.adminavatar) {
+          await deleteFromS3(user.adminavatar);
+          console.log(deleteFromS3)
+          Object.assign(user, updates);
+          await user.save();
+          res.status(200).json({
+            success:true,
+            message:"profile update successfully",
+            user,
+          })
+        }
+      }catch(err){
+        res.status(500).json({
+          success:false,
+          message:"failed to update profile",
+          error:err.message,
+        })
+      }
     });
   });
-
-  export const updateadminprofilepicture= catchAsyncError(async (req, res, next) => {
-    const user = await User.findById(req.params.id);
-    if(req.file){
-      const file =getDataUri(req.file);
-      await cloudinary.v2.uploader.destroy(user.AdminAvatar.public_id);
-      const mycloud = await cloudinary.v2.uploader.upload(file.content);
-    user.AdminAvatar ={
-      public_id:mycloud.public_id,
-      url:mycloud.secure_url,
-    }
-    }
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "admin image Updated Successfully",
-    });
-    });
-
 
   export const forgetPassword = catchAsyncError(async (req, res, next) => {
     const { email } = req.body;

@@ -1,16 +1,13 @@
 import express from "express";
-import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateadminprofilepicture, updateUserRole, getallusers} from "../controllers/adminController.js";
+import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
-// import { uploadImage } from "../middlewares/multer.js";
-import { singleUpload } from "../middlewares/multer.js";
 const router = express.Router();
-router.route("/registeradmin").post(singleUpload,registerUser);
+router.route("/registeradmin").post(registerUser);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
 router.route("/myprofile").get(isAuthenticated,getMyProfile);
 router.route("/updateadminpassword").put(isAuthenticated,updatePassword);
-router.route("/updateadminprofile").put(isAuthenticated,updateProfile);
-router.route("/updateadminprofilepicture/:id").put(singleUpload,isAuthenticated,updateadminprofilepicture);
+router.route("/updateadminprofile/:id").put(isAuthenticated,updateProfile);
 router.route("/forgetpassword").post(forgetPassword);
 router.route("/testapi").post(testapi);
 // ResetPassword

@@ -9,8 +9,8 @@ import mongoose from "mongoose";
 import { User } from "../models/User.js";
 
 export const AddnewEvent = catchAsyncError(async (req, res, next) => {
-    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId} = req.body;
-    if (!eventname||!address||!phonenumber)
+    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId,EventType} = req.body;
+    if (!eventname||!address||!phonenumber||!EventType)
       return next(new ErrorHandler("Please enter all field", 400));
     let event = await Event.findOne({eventname});
     if (event) return next(new ErrorHandler("Event Already Exist", 409));
@@ -25,7 +25,7 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
            }
         
     const eventobj = {
-        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId
+        eventname,description,datebegin,dateend,phonenumber,website,location,address,EventPhoto,status,storeId,EventType
     }
     const eventNewObject = new Event(eventobj);
    let finalevent = await eventNewObject.save();

@@ -27,15 +27,18 @@ const schema = new mongoose.Schema({
     default: "user",
   },
 
-    AdminAvatar:{
-        public_id:{
-            type:String,
-            required:true,
-        },
-        url:{
-            type:String,
-            required:true
-        }
+    // AdminAvatar:{
+    //     public_id:{
+    //         type:String,
+    //         required:true,
+    //     },
+    //     url:{
+    //         type:String,
+    //         required:true
+    //     }
+    // },
+    adminavatar:{
+      type:String
     },
     testapidata:{
       type:String
