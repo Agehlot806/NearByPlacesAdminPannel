@@ -68,7 +68,10 @@ export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
       }
       const {categoryname} = req.body;
       const updates ={};
-      if(categoryname) updates.categoryname = categoryname;
+      if(categoryname){
+        updates.categoryname = categoryname;
+      }
+  
       if (req.files['categoryimage']) {
         const photoUrl1Value = req.files['categoryimage'][0].location;
         updates.categoryimage = photoUrl1Value;
@@ -80,13 +83,12 @@ export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
       }
       try{
         const category = await Category.findById(categoryId);
-        if(!category){
+        if(!category)
           return next(new ErrorHandler("Category not found"));
-        }
         if (updates.categoryimage && category.categoryimage) {
           await deleteFromS3(category.categoryimage);
         }
-        if (updates.categoryicon && store.categoryicon) {
+        if (updates.categoryicon && category.categoryicon) {
           await deleteFromS3(category.categoryicon);
         }
 
