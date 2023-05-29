@@ -53,10 +53,10 @@ export const DeleteCategory = catchAsyncError(async(req,res,next)=>{
 })
 
 export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
-    const category = await Category.findById(req.params.categoryId).populate("stores","name status reviews storeownername storephoto storegallery ratings")
+    const category = await Category.findById(req.params.categoryId).populate("categoryname")
     res.status(200).json( {
         success:true,
-        category
+        category,
     })
 })
 
@@ -84,13 +84,13 @@ export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
           return next(new ErrorHandler("Category not found"));
         }
         if (updates.categoryimage && category.categoryimage) {
-          await deleteFromS3(store.categoryimage);
+          await deleteFromS3(category.categoryimage);
         }
         if (updates.categoryicon && store.categoryicon) {
-          await deleteFromS3(store.categoryicon);
+          await deleteFromS3(category.categoryicon);
         }
 
-        Object.assign(store, updates);
+        Object.assign(category, updates);
         await category.save();
         res.status(200).json({
           success:true,
