@@ -5,32 +5,27 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import cloudinary from "cloudinary";
 import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
+import { offerupload } from "../middlewares/multer.js";
 
 export const AddnewOffer = catchAsyncError(async (req, res, next) => {
-    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend} = req.body;
+  offerupload(req,res,async(err)=>{
+    if (err)
+    return next(new ErrorHandler("failed to upload image try again later"));
+    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,storeId} = req.body;
     if (!name||!PricingOfferValue||!coupon_code||!coupon_type||!value)
-      return next(new ErrorHandler("Please enter all field", 400));
+    return next(new ErrorHandler("Please enter all field", 400));
     let offer = await Offer.findOne({name});
     if (offer) return next(new ErrorHandler("Offer Already Exist", 409));
-    let offerImage = undefined;
-        if(req.file){
-            const file = getDataUri(req.file);
-             const mycloud = await cloudinary.v2.uploader.upload(file.content);
-             offerImage ={
-               public_id:mycloud.public_id,
-               url:mycloud.secure_url,
-             }
-           }
+    const offerimagevalue = req.file.location;
     offer = await Offer.create({
-        name,description,PricingOfferValue,offerImage,coupon_code,value,coupon_type,datebegin,dateend,status
-    });  
-
+      name,description,PricingOfferValue,offerimage:offerimagevalue,coupon_code,value,coupon_type,datebegin,dateend,status,storeId
+    });
     res.status(201).json({
       success:true,
       message:"offer created successfully",
       offer
     })
-
+  })
   });
 
   export const GetallOffers  = catchAsyncError(async (req, res, next) => {

@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-
+  storeId:{
+    type:mongoose.Schema.Types.ObjectId,
+    required:true,
+    ref:"Store"
+},
 
   name:{
     type:String
@@ -9,33 +13,14 @@ const schema = new mongoose.Schema({
         type:String,
         // required:true,
     },
-    offerImage:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+    offerimage:{
+       type:String
     },
   PricingOfferValue:{
     type:String,
     required:true,
   },
-  // couponConfig:[
-  //   {
-  //       coupon_type:{
-  //           type:String,
-  //       },
-  //       value:{
-  //           type:Number
-  //       },
-  //       coupon_code:{
-  //           type:String,
-  //       }
-  //   }
-  // ],
+  
 
   coupon_type:{
     type:String,

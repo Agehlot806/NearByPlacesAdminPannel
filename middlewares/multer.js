@@ -36,6 +36,11 @@ const upload = (bucketName) =>
     { name: 'storephoto', maxCount: 1 },
     { name: 'storegallery', maxCount: 1 },
   ]);
+  export const categoryupload = upload("bookmyplaceimagebucket").fields([
+    { name: 'categoryimage', maxCount: 1 },
+    { name: 'categoryicon', maxCount: 1 },
+  ]);
+export const offerupload = upload("bookmyplaceimagebucket").single("offerimage");
 
 const deleteFromS3 = async (url) => {
   const s3 = new aws.S3({

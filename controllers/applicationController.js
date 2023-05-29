@@ -1,46 +1,30 @@
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Category } from "../models/Application.js";
-import getDataUri from "../utils/dataUri.js";
-import cloudinary from "cloudinary";
-
-
+import { categoryupload } from "../middlewares/multer.js";
+import deleteFromS3 from "../middlewares/multer.js";
 export const addnewCategory = catchAsyncError(async(req,res,next)=>{
-    const {categoryname} = req.body;
+  categoryupload(req,res,async(err)=>{
+    if (err)
+      return res.status(400).json({ success: false, message: err.message });
+      const {categoryname} = req.body;
+      const categoryurlvalue1 = req.files['categoryimage'][0].location;
+      const categoryurlvalue2 = req.files['categoryicon'][0].location;
     if(!categoryname)
     return next(new ErrorHandler("please add all fields",400));
     let category = await Category.findOne({categoryname});
     if(category)
     return next(new ErrorHandler("category already defined",409));
-    let categoryImage = undefined;
-    let categoryIcon = undefined;
-    if(req.files['categoryimagefile'][0]){
-        const file = getDataUri(req.files['categoryimagefile'][0]);
-        const mycloud = await cloudinary.v2.uploader.upload(file.content);
-        categoryImage ={
-          public_id:mycloud.public_id,
-          url:mycloud.secure_url,
-        }
-      }
-      if(req.files['categoryiconfile'][0]){
-        const file = getDataUri(req.files['categoryiconfile'][0]);
-        const mycloud = await cloudinary.v2.uploader.upload(file.content);
-        categoryIcon ={
-          public_id:mycloud.public_id,
-          url:mycloud.secure_url,
-        }
-      }
-       category = await Category.create({
-        categoryname,categoryImage,categoryIcon
-       })
+    category = await Category.create({
+      categoryname,categoryimage:categoryurlvalue1,categoryicon:categoryurlvalue2
+     })
+     res.status(201).json({
+      success:true,
+      message:"category added successfully",
+      category,
+     })
 
-
-       res.status(201).json({
-        success:true,
-        message:"category added successfully",
-        category,
-       })
-    
+  })
 });
 
 
@@ -54,16 +38,18 @@ export const getAllCategory = catchAsyncError(async(req,res,next)=>{
 })
 
 export const DeleteCategory = catchAsyncError(async(req,res,next)=>{
-    const category = await Category.findById(req.params.id);
-    if(!category)return next(new ErrorHandler("category not found",404));
-    await cloudinary.v2.uploader.destroy(category.categoryImage.public_id);
-    await cloudinary.v2.uploader.destroy(category.categoryIcon.public_id);
-    await category.deleteOne();
-     res.status(200).json({
-       success: true,
-       message: "category Deleted Successfully",
-     });
-
+    const categoryId= req.params.id;
+    try{
+      const category = await Category.findById(categoryId);
+      if(!category)return next(new ErrorHandler("category not found",404));
+      await category.deleteOne();
+       res.status(200).json({
+         success: true,
+         message: "category Deleted Successfully",
+       });
+    }catch(error){
+      next(ErrorHandler("failer to delete the category"))
+    }
 })
 
 export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
@@ -75,13 +61,49 @@ export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
 })
 
 export const updateCategoryData = catchAsyncError(async(req,res,next)=>{
-    const {categoryname} = req.body;
-    const category = await Category.findById(req.params.id);
-    if(categoryname) category.categoryname = categoryname;
-    await category.save();
-    res.status(200).json({
-        success:true,
-        message:"category updated successfully",
-        category
+    const categoryId = req.params.id;
+    categoryupload(req,res,async(err)=>{
+      if (err) {
+        return next(new ErrorHandler("Failed to update image"));
+      }
+      const {categoryname} = req.body;
+      const updates ={};
+      if(categoryname) updates.categoryname = categoryname;
+      if (req.files['categoryimage']) {
+        const photoUrl1Value = req.files['categoryimage'][0].location;
+        updates.categoryimage = photoUrl1Value;
+      }
+  
+      if (req.files['categoryicon']) {
+        const photoUrl2Value = req.files['categoryicon'][0].location;
+        updates.categoryicon = photoUrl2Value;
+      }
+      try{
+        const category = await Category.findById(categoryId);
+        if(!category){
+          return next(new ErrorHandler("Category not found"));
+        }
+        if (updates.categoryimage && category.categoryimage) {
+          await deleteFromS3(store.categoryimage);
+        }
+        if (updates.categoryicon && store.categoryicon) {
+          await deleteFromS3(store.categoryicon);
+        }
+
+        Object.assign(store, updates);
+        await category.save();
+        res.status(200).json({
+          success:true,
+          message:"category updated successfully",
+          category
+      })
+      }catch(error){
+        res.status(500).json({
+          success: false,
+          message: "Failed to update category",
+          error: error.message
+        });
+      }
     })
+    
 })

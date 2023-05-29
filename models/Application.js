@@ -5,25 +5,11 @@ const schema = new mongoose.Schema({
         store: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Store' }],
         required:true,
     },
-    categoryImage:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+    categoryimage:{
+       type:String,
     },
-    categoryIcon:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+    categoryicon:{
+       type:String,
     },
     stores: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Store' }]
 })
