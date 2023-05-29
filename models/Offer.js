@@ -1,11 +1,8 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema({
-  storeId:{
-    type:mongoose.Schema.Types.ObjectId,
-    required:true,
-    ref:"Store"
-},
-
+  offerstore:{
+    type:String,
+  },
   name:{
     type:String
   },
@@ -17,11 +14,16 @@ const schema = new mongoose.Schema({
        type:String
     },
   PricingOfferValue:{
-    type:String,
-    required:true,
+  type:String,
+  enum:["Price","Percent"],
+  },
+  priceUsd: {
+    type: Number
+  },
+  percent: {
+    type: Number
   },
   
-
   coupon_type:{
     type:String,
   },
