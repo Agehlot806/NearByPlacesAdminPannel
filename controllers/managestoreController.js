@@ -1,51 +1,37 @@
 import { Store } from "../models/Stores.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
-import cloudinary from "cloudinary";
-import getDataUri from "../utils/dataUri.js";
 import ApiFeatures from "../utils/apifeatures.js";
 import { Category } from "../models/Application.js";
+import { storeupload } from "../middlewares/multer.js";
+import deleteFromS3 from "../middlewares/multer.js";
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
-    const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
-    if (!name||!latitude||!longitude||!phonenumber)
-    return next(new ErrorHandler("please add all fields",400));
-    let store = await Store.findOne({name})
-    if(store)
-    return next(new ErrorHandler("store already registerd",409));
-    const {categoryId} = req.params;
-
-        let storegallery =undefined;
-        let storephoto = undefined;
-        if(req.files['storegalleryfiles'][0]){
-            const file = getDataUri(req.files['storegalleryfiles'][0]);
-            const mycloud = await cloudinary.v2.uploader.upload(file.content);
-            storegallery ={
-              public_id:mycloud.public_id,
-              url:mycloud.secure_url,
-            }
-          }
-          if(req.files['storephotofiles'][0]){
-            const file = getDataUri(req.files['storephotofiles'][0]);
-            const mycloud = await cloudinary.v2.uploader.upload(file.content);
-            storephoto ={
-              public_id:mycloud.public_id,
-              url:mycloud.secure_url,
-            }
-          }
-            
-    const newstoreobject = {
-        name,phonenumber,website,details,videourl,latitude,longitude,storegallery,storephoto,status,storeownername,category:categoryId};
-     
-    store = new Store(newstoreobject);
-    await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true})
-    await store.save()
-    res.status(201).json({
-      success: true,
-      message: "Store added Successfully.",
-    });
+    storeupload(req,res,async(err)=>{
+      if (err)
+      return res.status(400).json({ success: false, message: err.message });
+      const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
+      const photoUrl1Value = req.files['storephoto'][0].location;
+      const photoUrl2Value = req.files['storegallery'][0].location;
+      if (!name||!latitude||!longitude||!phonenumber)
+      return next(new ErrorHandler("please add all fields",400));
+      let store = await Store.findOne({name})
+      if(store)
+      return next(new ErrorHandler("store already registerd",409));
+      const {categoryId} = req.params;
+      const newstoreobject = {
+        name,phonenumber,website,details,videourl,latitude,longitude,storegallery:photoUrl2Value,storephoto:photoUrl1Value,status,storeownername,category:categoryId};
+        store = new Store(newstoreobject);
+        await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true});
+        await store.save();
+        res.status(201).json({
+          success: true,
+          message: "Store added Successfully.",
+          store,
+        });
+    })
   });
 
- 
+
   export const GetAllStores  = catchAsyncError(async (req, res, next) => {
     const resultPerPage =5;
     const storeCount = await Store.countDocuments();
@@ -68,66 +54,142 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
   });
 
 export const DeleteStore = catchAsyncError(async (req, res, next) => {
-    const store = await Store.findById(req.params.id);
+  const storeId = req.params.id;
+  try{
+    const store = await Store.findById(storeId);
     if (!store) return next(new ErrorHandler("Store not found", 404));
-    await cloudinary.v2.uploader.destroy(store.storegallery.public_id);
-    await cloudinary.v2.uploader.destroy(store.storephoto.public_id);
-   await store.deleteOne();
+    await store.deleteOne();
     res.status(200).json({
       success: true,
       message: "Store Deleted Successfully",
     });
+  }catch(error){
+    next(ErrorHandler("failed to delete event",500))
+  }
   });
 
+  // export const UpdateStore = catchAsyncError(async (req, res, next) => {
+  //   const storeId = req.params.id;
+  //   storeupload(req,res,async(err)=>{
+  //     if (err)
+  //       return next(new ErrorHandler("failed to update image"));
+  //       const {name,category,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
+  //       console.log(name)
+  //       const updates = {};
+  //       if (name) updates.name = name;
+  //       if (category) updates.category = category;
+  //       if (phonenumber) updates.phonenumber = phonenumber;
+  //       if (website) updates.website = website;
+  //       if (details) updates.details = details;
+  //       if (videourl) updates.videourl = videourl;
+  //       if (latitude) updates.latitude = latitude;
+  //       if (longitude) updates.longitude = longitude;
+  //       if (status) updates.status = status;
+  //       if (storeownername) updates.storeownername = storeownername;
+  //      if (req.files['storephoto']) {
+  //       const photoUrl1Value = req.files['storephoto'][0].location;
+  //       updates.storephoto = photoUrl1Value;
+  //     }
+  
+  //     if (req.files['storegallery']) {
+  //       const photoUrl2Value = req.files['storegallery'][0].location;
+  //       updates.storegallery = photoUrl2Value;
+  //     }
+  //     try{
+  //       const store = await Store.findById(storeId);
+  //       if(!store)
+  //       return next(new ErrorHandler("Store not found"));
+  //       if (updates.storephoto && store.storephoto) {
+  //         await deleteFromS3(store.storephoto);
+  //       }
+  //       if (updates.storegallery && store.storegallery) {
+  //         await deleteFromS3(store.storegallery);
+  //       }
+
+  //       Object.assign(store, updates);
+  //       await store.save();
+  //       res.status(200).json({
+  //         success: true,
+  //         message: "Store updated successfully",
+  //         store
+  //       });
+  //     }catch(error){
+  //       res.status(500).json({
+  //         success: false,
+  //         message: "Failed to update profile",
+  //         error: error.message,
+  //       });
+  //     }
+  //   })
+  // });
   export const UpdateStore = catchAsyncError(async (req, res, next) => {
-    const {name,category,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
-    const store = await Store.findById(req.params.id);
-    if (name) store.name = name;
-    if (category) store.category = category;
-    if (phonenumber) store.phonenumber = phonenumber;
-    if (website) store.website = website;
-    if (details) store.details = details;
-    if (videourl) store.videourl = videourl;
-    if (latitude) store.latitude = latitude;
-    if (longitude) store.longitude = longitude;
-    if (status) store.status = status;
-    if (storeownername) store.storeownername = storeownername
-    await store.save();
-    res.status(200).json({
-      success: true,
-      message: "Store Updated Successfully",
-      store
+    const storeId = req.params.id;
+    storeupload(req, res, async (err) => {
+      if (err) {
+        return next(new ErrorHandler("Failed to update image"));
+      }
+      const {
+        name,
+        category,
+        phonenumber,
+        website,
+        details,
+        videourl,
+        latitude,
+        longitude,
+        status,
+        storeownername
+      } = req.body;
+      console.log(name);
+      const updates = {};
+      if (name) updates.name = name;
+      if (category) updates.category = category;
+      if (phonenumber) updates.phonenumber = phonenumber;
+      if (website) updates.website = website;
+      if (details) updates.details = details;
+      if (videourl) updates.videourl = videourl;
+      if (latitude) updates.latitude = latitude;
+      if (longitude) updates.longitude = longitude;
+      if (status) updates.status = status;
+      if (storeownername) updates.storeownername = storeownername;
+      if (req.files['storephoto']) {
+        const photoUrl1Value = req.files['storephoto'][0].location;
+        updates.storephoto = photoUrl1Value;
+      }
+  
+      if (req.files['storegallery']) {
+        const photoUrl2Value = req.files['storegallery'][0].location;
+        updates.storegallery = photoUrl2Value;
+      }
+      try {
+        const store = await Store.findById(storeId);
+        if (!store) {
+          return next(new ErrorHandler("Store not found"));
+        }
+        if (updates.storephoto && store.storephoto) {
+          await deleteFromS3(store.storephoto);
+        }
+        if (updates.storegallery && store.storegallery) {
+          await deleteFromS3(store.storegallery);
+        }
+  
+        Object.assign(store, updates);
+        await store.save();
+        res.status(200).json({
+          success: true,
+          message: "Store updated successfully",
+          store
+        });
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: "Failed to update profile",
+          error: error.message
+        });
+      }
     });
   });
-
-
-  export const UpdateStoreProfile= catchAsyncError(async (req, res, next) => {
-    const store = await Store.findById(req.params.id);
-    if(req.files['storegalleryfiles'][0]){
-    const file = getDataUri(req.files['storegalleryfiles'][0]);
-    await cloudinary.v2.uploader.destroy(store.storegallery.public_id);
-    const mycloud = await cloudinary.v2.uploader.upload(file.content);
-    store.storegallery ={
-      public_id:mycloud.public_id,
-      url:mycloud.secure_url,
-    }
-    }
-   if(req.files['storephotofiles'][0]){
-      const file = getDataUri(req.files['storephotofiles'][0]);
-      await cloudinary.v2.uploader.destroy(store.storephoto.public_id);
-      const mycloud = await cloudinary.v2.uploader.upload(file.content);
-      store.storephoto ={
-        public_id:mycloud.public_id,
-        url:mycloud.secure_url,
-      }
-      }
-    await store.save();
-    res.status(200).json({
-      success: true,
-      message: "Store Images  Updated Successfully",
-    });
-  });
-
+  
   
 //user store reviews 
   export const createStoreReviews = catchAsyncError(async (req, res, next) => {

@@ -56,7 +56,6 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
         return next(new ErrorHandler("Event not found", 404));
       }
       await event.deleteOne();
-  
       res.status(200).json({
         success: true,
         message: "Event Deleted Successfully",
@@ -65,6 +64,8 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
       next(new ErrorHandler("Failed to delete event", 500));
     }
   });
+
+  
 
   export const UpdateEvent = catchAsyncError(async (req, res, next) => {
     const eventId = req.params.id;

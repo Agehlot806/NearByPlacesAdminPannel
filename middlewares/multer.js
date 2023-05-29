@@ -1,7 +1,7 @@
 // import multer from "multer";
 const storage = multer.memoryStorage();
 export const singleUpload = multer({ storage }).single("file");
-export const storeUpload = multer({storage}).fields([{name:'storegalleryfiles',maxCount:10},{name:'storephotofiles',maxCount:10}]);
+// export const storeUpload = multer({storage}).fields([{name:'storegalleryfiles',maxCount:10},{name:'storephotofiles',maxCount:10}]);
 export const categoryUpload = multer({storage}).fields([{name:"categoryimagefile",maxCount:2},{name:"categoryiconfile",maxCount:2}]);
 
 import multer from "multer";
@@ -31,7 +31,11 @@ const upload = (bucketName) =>
     }),
   });
   export const uploadsingle = upload("bookmyplaceimagebucket").single("adminavatar");
-  export const eventuplaod = upload("bookmyplaceimagebucket").single("eventimage")
+  export const eventuplaod = upload("bookmyplaceimagebucket").single("eventimage");
+  export const storeupload = upload("bookmyplaceimagebucket").fields([
+    { name: 'storephoto', maxCount: 1 },
+    { name: 'storegallery', maxCount: 1 },
+  ]);
 
 const deleteFromS3 = async (url) => {
   const s3 = new aws.S3({

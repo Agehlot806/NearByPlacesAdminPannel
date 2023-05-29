@@ -30,24 +30,10 @@ const schema = new mongoose.Schema({
     },
 
     storephoto:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+      type:String,
     },
     storegallery:{
-        public_id:{
-            type:String,
-            required:true
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+      type:String
     },
     numOfReviews: {
         type: Number,
