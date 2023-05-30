@@ -23,7 +23,7 @@ app.use(cookieParser());
 // }))
 app.use(
 	cors({
-		origin: ["http://localhost:3000","https://demo7.progressiveaidata.in/"],
+		origin:"https://demo7.progressiveaidata.in/",
 		credentials: true,
 		methods: ["GET", "POST", "PUT", "DELETE"],
 	})
