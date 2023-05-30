@@ -10,7 +10,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
     if (err)
     return next(new ErrorHandler("failed to upload image try again later"));
     const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
-    if (!name||!PricingOfferValue||!coupon_code||!coupon_type||!value)
+    if (!name||!PricingOfferValue||!coupon_type||!value)
     return next(new ErrorHandler("Please enter all field", 400));
     let offer = await Offer.findOne({name});
     if (offer) return next(new ErrorHandler("Offer Already Exist", 409));
