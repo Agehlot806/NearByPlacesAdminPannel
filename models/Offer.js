@@ -3,12 +3,12 @@ const schema = new mongoose.Schema({
   offerstore:{
     type:String,
   },
-  name:{
-    type:String
-  },
+ offername:{
+  type:String,
+  required:true,
+ },
     description:{
         type:String,
-        // required:true,
     },
     offerimage:{
        type:String
@@ -28,10 +28,12 @@ const schema = new mongoose.Schema({
     type:String,
   },
   value:{
-          type:Number
+          type:Number,
+          required:true,
          },
          coupon_code:{
                type:String,
+
         },
 
       datebegin:{

@@ -2,21 +2,22 @@ import { Offer } from "../models/Offer.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import ApiFeatures from "../utils/apifeatures.js";
-import deleteFromS3, { offerupload } from "../middlewares/multer.js";
+import { offerupload } from "../middlewares/multer.js";
+import deleteFromS3 from "../middlewares/multer.js";
 
 
 export const AddnewOffer = catchAsyncError(async (req, res, next) => {
   offerupload(req,res,async(err)=>{
     if (err)
     return next(new ErrorHandler("failed to upload image try again later"));
-    const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
-    if (!name||!coupon_type||!value)
+    const {offername,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
+    if (!offername||!coupon_type||!value)
     return next(new ErrorHandler("Please enter all field", 400));
-    let offer = await Offer.findOne({name});
+    let offer = await Offer.findOne({offername});
     if (offer) return next(new ErrorHandler("Offer Already Exist", 409));
     const offerimagevalue = req.file.location;
     offer = await Offer.create({
-      name,description,PricingOfferValue,offerimage:offerimagevalue,coupon_code,value,coupon_type,datebegin,dateend,status,offerstore,priceUsd,percent
+      offername,description,PricingOfferValue,offerimage:offerimagevalue,coupon_code,value,coupon_type,datebegin,dateend,status,offerstore,priceUsd,percent
     });
     res.status(201).json({
       success:true,
@@ -60,9 +61,9 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
       if (err) {
         return next(new ErrorHandler("Failed to update image"));
       }
-      const {name,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
+      const {offername,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
       const updates = {};
-      if (name) updates.name = name;
+      if (offername) updates.offername = offername;
       if (description) updates.description = description;
       if (PricingOfferValue) updates.PricingOfferValue = PricingOfferValue;
       if (coupon_code) updates.coupon_code = coupon_code;
