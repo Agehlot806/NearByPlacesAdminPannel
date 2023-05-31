@@ -30,16 +30,29 @@ const schmea = new mongoose.Schema({
      
     },
   ],
-  StoreId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Store",
-    // required: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+ storename:{
+type:String,
+
+ },
+  userData: [
+    {
+       userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        
+       },
+       name:{
+        type:String,
+        required:true,
+       },
+       email:{
+        type:String,
+        required:true
+       }
+      }
+
+  ],
   paymentInfo: {
     id: {
       type: String,

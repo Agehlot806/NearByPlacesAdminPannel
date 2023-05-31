@@ -4,19 +4,23 @@ import ErrorHandler from "../utils/ErrorHandler.js";
 import { Store } from "../models/Stores.js";
 
 export const NewBooking = catchAsyncError(async(req,res,next)=>{
-    const {bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,StoreId} = req.body;
-    const store = await Store.findById(StoreId);
-    console.log(store)
+    const {bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice} = req.body;
+    const store = await Store.findById(req.body.StoreId);
+   const userobj = {
+    userId:req.user._id,
+    name:req.user.name,
+    email:req.user.email
+   }
     const booking = await Booking.create({
         bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,paidAt:Date.now(),
-        user:req.user,
-        // store
+        storename:store.name,
     })
+    booking.userData.push(userobj);
+    await booking.save();
     res.status(201).json({
         success:true,
         message:"Booking created Successfully",
         booking,
-        store,
     })
 
 });
