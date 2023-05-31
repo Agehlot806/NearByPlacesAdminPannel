@@ -37,6 +37,9 @@ type:String,
  storenumber:{
     type:Number,
  },
+ storeimage:{
+    type:String,
+ },
   userData: [
     {
        userId:{

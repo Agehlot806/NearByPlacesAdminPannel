@@ -15,6 +15,7 @@ export const NewBooking = catchAsyncError(async(req,res,next)=>{
         bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,paidAt:Date.now(),
         storename:store.name,
         storenumber:store.phonenumber,
+        storeimage:store.storephoto,
     })
     booking.userData.push(userobj);
     await booking.save();
