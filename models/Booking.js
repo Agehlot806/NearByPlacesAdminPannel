@@ -26,14 +26,15 @@ const schmea = new mongoose.Schema({
       reservationTime:{
         type:String,
         required:true,
-      },
-      Store: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Store",
-        required: true,
-      },
+      }
+     
     },
   ],
+  StoreId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Store",
+    // required: true,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

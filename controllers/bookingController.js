@@ -1,17 +1,22 @@
 import { Booking } from "../models/Booking.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
+import { Store } from "../models/Stores.js";
 
 export const NewBooking = catchAsyncError(async(req,res,next)=>{
-    const {bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice} = req.body;
+    const {bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,StoreId} = req.body;
+    const store = await Store.findById(StoreId);
+    console.log(store)
     const booking = await Booking.create({
         bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,paidAt:Date.now(),
-        user:req.user._id,
+        user:req.user,
+        // store
     })
     res.status(201).json({
         success:true,
         message:"Booking created Successfully",
         booking,
+        store,
     })
 
 });
@@ -43,7 +48,7 @@ export const myBookings = catchAsyncError(async (req, res, next) => {
         totalAmount += booking.totalPrice;
     });
     res.status(200).json({
-      success: true,
+      success: true,    
       totalAmount,
       bookings,
     });
