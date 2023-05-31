@@ -35,7 +35,7 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
       success: true,
       events,
       EventCounts,
-      resultPerPage
+      resultPerPage,
     });
   });
 
@@ -43,7 +43,8 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
     const events = await Event.findById(req.params.id);
     res.status(200).json({
       success: true,
-      events    
+      events ,
+      totalparticipant:events.usersparticipated.length,
     });
   });
 
