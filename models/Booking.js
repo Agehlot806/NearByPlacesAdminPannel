@@ -34,6 +34,9 @@ const schmea = new mongoose.Schema({
 type:String,
 
  },
+ storenumber:{
+    type:Number,
+ },
   userData: [
     {
        userId:{
