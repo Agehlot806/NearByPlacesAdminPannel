@@ -3,6 +3,7 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import ApiFeatures from "../utils/apifeatures.js";
 import deleteFromS3, { eventuplaod } from "../middlewares/multer.js";
+import { User } from "../models/User.js";
 
 export const AddnewEvent = catchAsyncError(async (req, res, next) => {
   eventuplaod(req,res,async(err)=>{
@@ -26,18 +27,42 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
   })
   });
 
-  export const GetAllEvents  = catchAsyncError(async (req, res, next) => {
-    const resultPerPage =5;
+  // export const GetAllEvents  = catchAsyncError(async (req, res, next) => {
+  //   const resultPerPage =5;
+  //   const EventCounts = await Event.countDocuments();
+  //   const apiFeature = new ApiFeatures(Event.find(),req.query).search().filter().pagination(resultPerPage);
+  //   let events = await apiFeature.query;
+  //   res.status(200).json({
+  //     success: true,
+  //     events,
+  //     EventCounts,
+  //     resultPerPage,
+  //   });
+  // });
+  export const GetAllEvents = catchAsyncError(async (req, res, next) => {
+    const resultPerPage = 5;
     const EventCounts = await Event.countDocuments();
-    const apiFeature = new ApiFeatures(Event.find(),req.query).search().filter().pagination(resultPerPage);
+    const apiFeature = new ApiFeatures(Event.find(), req.query).search().filter().pagination(resultPerPage);
     let events = await apiFeature.query;
+  
+    // Retrieve user participation count for each event
+    const eventCounts = await Promise.all(
+      events.map(async (event) => {
+        const userCount = event.usersparticipated.length;
+        return { eventId: event._id, userCount };
+      })
+    );
+  
     res.status(200).json({
       success: true,
       events,
+      eventCounts,
       EventCounts,
       resultPerPage,
     });
   });
+  
+  
 
   export const getEventById = catchAsyncError(async (req, res, next) => {
     const events = await Event.findById(req.params.id);
