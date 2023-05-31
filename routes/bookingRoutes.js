@@ -5,7 +5,7 @@ const router  = express.Router();
 router.route("/booking/new").post(isAuthenticated,NewBooking);
 router.route("/booking/:id").get(isAuthenticated,getSingleBooking);
 router.route("/booking/me").get(isAuthenticated,myBookings);
-router.route("/admin/bookings").get(isAuthenticated,getAllBookings);
+router.route("/admin/bookings").get(getAllBookings);
 
 
 export default router;

@@ -57,8 +57,8 @@ export const myBookings = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("booking not found with this Id", 404));
     }
   
-    if (booking.BookingStatus === "Delivered") {
-      return next(new ErrorHandler("You have already delivered this order", 400));
+    if (booking.BookingStatus === "Confirmed") {
+      return next(new ErrorHandler("You have already Confirmed this Booking", 400));
     }
   
     order.orderStatus = req.body.status;
