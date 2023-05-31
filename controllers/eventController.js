@@ -27,18 +27,6 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
   })
   });
 
-  // export const GetAllEvents  = catchAsyncError(async (req, res, next) => {
-  //   const resultPerPage =5;
-  //   const EventCounts = await Event.countDocuments();
-  //   const apiFeature = new ApiFeatures(Event.find(),req.query).search().filter().pagination(resultPerPage);
-  //   let events = await apiFeature.query;
-  //   res.status(200).json({
-  //     success: true,
-  //     events,
-  //     EventCounts,
-  //     resultPerPage,
-  //   });
-  // });
   export const GetAllEvents = catchAsyncError(async (req, res, next) => {
     const resultPerPage = 5;
     const EventCounts = await Event.countDocuments();
@@ -49,19 +37,17 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
     const eventCounts = await Promise.all(
       events.map(async (event) => {
         const userCount = event.usersparticipated.length;
-        return { eventId: event._id, userCount };
+        return { ...event._doc, userCount }; // Include userCount in the event object
       })
     );
   
     res.status(200).json({
       success: true,
-      events,
-      eventCounts,
+      events: eventCounts, // Use eventCounts instead of the original events array
       EventCounts,
       resultPerPage,
     });
   });
-  
   
 
   export const getEventById = catchAsyncError(async (req, res, next) => {
