@@ -33,7 +33,8 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       if (err)
         return next(new ErrorHandler("failed to upload image try again later"))
         const{name,email,password,} = req.body;
-        if(!name||!email||!password)
+        const fcmToken = req.body.fcmToken;
+        if(!name||!email||!password||!fcmToken)
         return next(new ErrorHandler("Please enter all field", 400));
         let user = await User.findOne({ email });
         if (user) return next(new ErrorHandler("Admin Already Exist", 409));
@@ -43,6 +44,7 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
         email,
         password,
         adminavatar: adminavatarvalue,
+        fcmToken
         
       })
     
