@@ -6,6 +6,14 @@ import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto"
 import { uploadsingle } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
+import admin from "firebase-admin";
+import serviceAccount from '../book-my-place-tarun-firebase-adminsdk-hnvjf-04ae09427e.json' assert { type: 'json' };
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+
+
 export const registerUser = catchAsyncError(async (req, res, next) => {
     uploadsingle(req, res, async (err) => {
       if (err)
@@ -21,12 +29,141 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
         email,
         password,
         adminavatar: adminavatarvalue,
+        
       })
+    
+      await user.save();
+
         sendToken(res, user, `${user.role} added Successfully`, 201);
     });
   });
 
+  // export const SendNotification = catchAsyncError(async(req,res,next)=>{
+  //   try {
+  //     const tokens = await fetchTokensFromDatabase();
+  
+  //     const message = {
+  //       notification: {
+  //         title: 'New Notification',
+  //         body: 'This is a notification from your app!',
+  //       },
+  //       tokens: tokens,
+  //     };
+  
+  //     const response = await admin.messaging().sendMulticast(message);
+  
+  //     console.log('Notification sent:', response);
+  
+  //     res.sendStatus(200);
+  //   } catch (error) {
+  //     console.error('Error sending notifications:', error);
+  //     res.sendStatus(500);
+  //   }
+  // })
+  // export const SendNotification = catchAsyncError(async (req, res, next) => {
+  //   try {
+  //     const tokens = await fetchTokensFromDatabase();
+  
+  //     const message = {
+  //       notification: {
+  //         title: 'New Notification',
+  //         body: 'This is a notification from your app!',
+  //       },
+  //     };
+  
+  //     const responses = [];
+  //     for (const token of tokens) {
+  //       message.token = token;
+  
+  //       const response = await admin.messaging().send(message);
+  //       responses.push(response);
+  
+  //       console.log('Notification sent to', token);
+  //     }
+  
+  //     console.log('Notification responses:', responses);
+  
+  //     res.sendStatus(200);
+  //   } catch (error) {
+  //     console.error('Error sending notifications:', error);
+  //     res.sendStatus(500);
+  //   }
+  // });
+  
 
+  export const SendNotification = catchAsyncError(async (req, res, next) => {
+    try {
+      const tokens = await fetchTokensFromDatabase();
+  
+      const message = {
+        notification: {
+          title: 'New Notification',
+          body: 'This is a notification from your app!',
+        },
+        tokens: tokens,
+      };
+  
+      const response = await admin.messaging().sendMulticast(message);
+  
+      console.log('Notification sent:', response);
+  
+      const { successCount, failureCount } = response;
+  
+      // Check the delivery status of each user
+      const deliveryStatus = [];
+      response.responses.forEach((result, index) => {
+        if (result.success) {
+          deliveryStatus.push({
+            user: tokens[index],
+            status: 'Delivered',
+          });
+        } else {
+          deliveryStatus.push({
+            user: tokens[index],
+            status: 'Failed',
+            error: result.error,
+          });
+        }
+      });
+  
+      console.log('Delivery status:', deliveryStatus);
+  
+      res.sendStatus(200);
+    } catch (error) {
+      console.error('Error sending notifications:', error);
+      res.sendStatus(500);
+    }
+  });
+  
+
+  async function fetchTokensFromDatabase() {
+    try {
+      const users = await User.find({}, 'fcmToken');
+      console.log(users)
+      const tokens = users.map(user => user.fcmToken);
+      return tokens;
+    } catch (error) {
+      console.error('Error fetching tokens from database:', error);
+      throw error;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   export const login = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password)
