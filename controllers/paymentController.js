@@ -86,6 +86,24 @@ export const getallorders = catchAsyncError(async (req, res, next) => {
 });
 
 
+export const fetchSingleOrder = catchAsyncError(async(req,res,next)=>{
+  try {
+    const orderId = req.params.id;
+    const orders = await instance.orders.fetch(orderId);
+    res.status(200).json({
+      success: true,
+      orders,
+    });
+  } catch (error) {
+    console.error('Error retrieving orders from Razorpay:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve orders from Razorpay',
+    });
+  }
+})
+
+
 export const fetachpaymentforOrders = catchAsyncError(async (req, res, next) => {
   try {
     const orderId = req.params.id
@@ -103,4 +121,6 @@ export const fetachpaymentforOrders = catchAsyncError(async (req, res, next) => 
     });
   }
 });
+
+
 
