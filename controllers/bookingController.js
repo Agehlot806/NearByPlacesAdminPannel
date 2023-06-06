@@ -31,7 +31,7 @@ export const NewBooking = catchAsyncError(async(req,res,next)=>{
 
 });
 export const getSingleBooking = catchAsyncError(async(req,res,next)=>{
-    const booking = await Booking.findById(req.params.id).populate("user","name email");
+    const booking = await Booking.findById(req.params.id);
     if (!booking) {
         return next(new ErrorHandler("Booking not found with this Id", 404));
       }
