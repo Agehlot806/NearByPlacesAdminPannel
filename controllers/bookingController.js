@@ -2,15 +2,19 @@ import { Booking } from "../models/Booking.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Store } from "../models/Stores.js";
+// import { v4 as uuidv4 } from "uuid";
 
 export const NewBooking = catchAsyncError(async(req,res,next)=>{
-    const {bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice} = req.body;
+    const {bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice} = req.body;
     const store = await Store.findById(req.body.StoreId);
    const userobj = {
     userId:req.user._id,
     name:req.user.name,
     email:req.user.email
+
    }
+  //  const bookingId = uuidv4();
+  const bookingId = Math.floor(1000 + Math.random() * 9000);
     const booking = await Booking.create({
         bookingId,bookingDate,BookingItem,paymentInfo,Tableprice,taxPrice,totalPrice,paidAt:Date.now(),
         storename:store.name,
@@ -62,27 +66,24 @@ export const myBookings = catchAsyncError(async (req, res, next) => {
 
 
 
-  export const updateBooking = catchAsyncError(async (req, res, next) => {
-    const booking = await Booking.findById(req.params.id);
+  export const updateBookingStatus = catchAsyncError(async (req, res, next) => {
+    const { bookingId, BookingStatus } = req.body;
+  
+    const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return next(new ErrorHandler("booking not found with this Id", 404));
+      return next(new ErrorHandler("Booking not found", 404));
     }
   
-    if (booking.BookingStatus === "Confirmed") {
-      return next(new ErrorHandler("You have already Confirmed this Booking", 400));
-    }
+    booking.BookingStatus = BookingStatus;
+    await booking.save();
   
-    order.orderStatus = req.body.status;
-  
-    if (req.body.status === "Delivered") {
-      booking.deliveredAt = Date.now();
-    }
-  
-    await order.save({ validateBeforeSave: false });
     res.status(200).json({
       success: true,
+      message: "Booking status updated successfully",
+      booking,
     });
   });
+  
   
 
 

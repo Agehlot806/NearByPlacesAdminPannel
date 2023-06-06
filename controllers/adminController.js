@@ -76,73 +76,31 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   //     res.sendStatus(500);
   //   }
   // })
-  // export const SendNotification = catchAsyncError(async (req, res, next) => {
-  //   try {
-  //     const tokens = await fetchTokensFromDatabase();
-  
-  //     const message = {
-  //       notification: {
-  //         title: 'New Notification',
-  //         body: 'This is a notification from your app!',
-  //       },
-  //     };
-  
-  //     const responses = [];
-  //     for (const token of tokens) {
-  //       message.token = token;
-  
-  //       const response = await admin.messaging().send(message);
-  //       responses.push(response);
-  
-  //       console.log('Notification sent to', token);
-  //     }
-  
-  //     console.log('Notification responses:', responses);
-  
-  //     res.sendStatus(200);
-  //   } catch (error) {
-  //     console.error('Error sending notifications:', error);
-  //     res.sendStatus(500);
-  //   }
-  // });
-  
-
   export const SendNotification = catchAsyncError(async (req, res, next) => {
     try {
       const tokens = await fetchTokensFromDatabase();
   
-      const message = {
+      const messages = tokens.map((token) => ({
         notification: {
           title: 'New Notification',
           body: 'This is a notification from your app!',
         },
-        tokens: tokens,
-      };
+        token: token,
+      }));
   
-      const response = await admin.messaging().sendMulticast(message);
+      const response = await admin.messaging().sendAll(messages);
   
       console.log('Notification sent:', response);
   
-      const { successCount, failureCount } = response;
-  
-      // Check the delivery status of each user
-      const deliveryStatus = [];
-      response.responses.forEach((result, index) => {
-        if (result.success) {
-          deliveryStatus.push({
-            user: tokens[index],
-            status: 'Delivered',
-          });
-        } else {
-          deliveryStatus.push({
-            user: tokens[index],
-            status: 'Failed',
-            error: result.error,
-          });
+      const errors = [];
+      response.forEach((result, index) => {
+        if (!result.success) {
+          const error = result.error;
+          errors.push({ index, error });
         }
       });
   
-      console.log('Delivery status:', deliveryStatus);
+      console.log('Notification errors:', errors);
   
       res.sendStatus(200);
     } catch (error) {
@@ -150,6 +108,53 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       res.sendStatus(500);
     }
   });
+  
+  
+  
+
+  // export const SendNotification = catchAsyncError(async (req, res, next) => {
+  //   try {
+  //     const tokens = await fetchTokensFromDatabase();
+  
+  //     const message = {
+  //       notification: {
+  //         title: 'New Notification',
+  //         body: 'www.google.com',
+  //       },
+  //       tokens: tokens,
+  //     };
+  
+  //     const response = await admin.messaging().sendMulticast(message)
+  
+  //     console.log('Notification sent:', response);
+  
+  //     const { successCount, failureCount } = response;
+  
+  //     // Check the delivery status of each user
+  //     const deliveryStatus = [];
+  //     response.responses.forEach((result, index) => {
+  //       if (result.success) {
+  //         deliveryStatus.push({
+  //           user: tokens[index],
+  //           status: 'Delivered',
+  //         });
+  //       } else {
+  //         deliveryStatus.push({
+  //           user: tokens[index],
+  //           status: 'Failed',
+  //           error: result.error,
+  //         });
+  //       }
+  //     });
+  
+  //     console.log('Delivery status:', deliveryStatus);
+  
+  //     res.sendStatus(200);
+  //   } catch (error) {
+  //     console.error('Error sending notifications:', error);
+  //     res.sendStatus(500);
+  //   }
+  // });
   
 
   async function fetchTokensFromDatabase() {
@@ -163,20 +168,6 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       throw error;
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   

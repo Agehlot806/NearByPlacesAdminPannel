@@ -17,4 +17,4 @@ const schema = new mongoose.Schema({
 });
 
 
-export const Order = mongoose.model("Order", schema);
+export const PaymentModel = mongoose.model("PaymentModel", schema);
