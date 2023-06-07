@@ -8,9 +8,7 @@ import { User } from "../models/User.js";
 export const ReservationCheckout = catchAsyncError(async (req, res, next)  => {
     const eventId = req.params.id;
     const userId = req.user ? req.user._id : null;
-    console.log(userId)
     const event = await Event.findById(eventId);
-    console.log(event)
     if (!event) {
       return next(new ErrorHandler('Event not found', 404));
     }
@@ -24,7 +22,7 @@ export const ReservationCheckout = catchAsyncError(async (req, res, next)  => {
 
     const ticketCount = event.usersparticipated[0].ticketCount; // Assuming the ticket count is stored in the Event model
     console.log(ticketCount)
-    const totalAmount = event.EventPrice * ticketCount;
+    const totalAmount = event.EventPrice * ticketCount * 100;
     console.log(totalAmount)
     const options = {
       amount:totalAmount, // Amount in paise (e.g., for ₹10, amount = 1000)
@@ -68,7 +66,7 @@ export const paymentVerificationofReservation = catchAsyncError(async(req,res,ne
   
   const isAuthentic = expectedSignature === razorpay_signature;
   if (isAuthentic) {
-    await PaymentModel.create({
+    await Reservation.create({
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
@@ -83,3 +81,29 @@ export const paymentVerificationofReservation = catchAsyncError(async(req,res,ne
     });
   }
   })
+
+
+
+  export const getallordersofReservation = catchAsyncError(async (req, res, next) => {
+    try {
+      const ordersResponse = await instance.orders.all();
+      const orders = ordersResponse.items || [];
+      console.log(orders)
+  
+      // Filter orders based on notes.type
+      const filteredOrders = orders.filter(order => order.notes && order.notes.type === 'reservation');
+  
+      res.status(200).json({
+        success: true,
+        orders: filteredOrders,
+      });
+    } catch (error) {
+      console.error('Error retrieving orders from Razorpay:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to retrieve orders from Razorpay',
+      });
+    }
+  });
+  
+  
