@@ -68,7 +68,7 @@ const schema = new mongoose.Schema({
     type:String,
  },
 
- location:{
+ location1:{
     type:Map,
  },
 
@@ -87,6 +87,9 @@ const schema = new mongoose.Schema({
     EventType:{
         type:String,
         enum:["Paid","Unpaid"],
+    },
+    EventPrice:{
+        type:Number,
     }
 });
 export const Event = mongoose.model("Event",schema);

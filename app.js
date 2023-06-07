@@ -40,7 +40,7 @@ import csvData from "./routes/csvdataRoutes.js"
 import payment from "./routes/paymentRoutes.js"
 import application from "./routes/applicationRoutes.js"
 import booking from "./routes/bookingRoutes.js";
-
+import reservation from "./routes/reservationRoutes.js";
 
 app.use("/api/v1", admin);
 app.use("/api/v1",stores);
@@ -52,6 +52,7 @@ app.use("/api/v1",csvData);
 app.use("/api/v1",payment);
 app.use("/api/v1",application);
 app.use("/api/v1",booking);
+app.use("/api/v1",reservation);
 
 
 

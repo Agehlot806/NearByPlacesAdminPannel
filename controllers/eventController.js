@@ -9,7 +9,7 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
   eventuplaod(req,res,async(err)=>{
     if(err)
     return next(new ErrorHandler("failed to upload event image try again later"));
-    const {eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId,EventType} = req.body;
+    const {eventname,description,datebegin,dateend,phonenumber,website,location1,address,status,storeId,EventType,EventPrice} = req.body;
     if(!eventname||!address||!phonenumber||!EventType)
     return next(new ErrorHandler("please add all fields",400))
     let event = await Event.findOne({eventname});
@@ -17,7 +17,7 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Event already Exists",409));
     const eventimagevalue = req.file.location;
     event = await Event.create({
-      eventname,description,datebegin,dateend,phonenumber,website,location,address,status,storeId,EventType,eventimage:eventimagevalue
+      eventname,description,datebegin,dateend,phonenumber,website,location1,address,status,storeId,EventType,eventimage:eventimagevalue,EventPrice
     })
     res.status(201).json({
       success:true,
@@ -92,10 +92,11 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
         if(dateend) updates.dateend = dateend;
         if(phonenumber) updates.phonenumber =phonenumber;
         if(website) updates.website = website;
-        if(location) updates.location = location;
+        if(location1) updates.location1 = location1;
         if(address) updates.address = address;
         if(status) updates.status = status;
         if(storeId) updates.storeId = storeId;
+        if(EventPrice)updates.EventPrice = EventPrice;
         if(req.file){
           const eventurlValue =req.file.location;
           updates.eventimage = eventurlValue;

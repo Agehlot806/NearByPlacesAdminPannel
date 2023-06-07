@@ -2,7 +2,6 @@ import express from "express";
 import { AddnewEvent, DeleteEventById, GetAllEvents, UpdateEvent, addparticipantToEvent, deleteparticipantfromEvent, getEventById ,getallEventParticipants} from "../controllers/eventController.js";
 import {isAuthenticated, specificauth } from "../middlewares/auth.js";
 import { authorizeAdmin } from "../middlewares/auth.js";
-import { singleUpload } from "../middlewares/multer.js";
 const router = express.Router();
 router.route("/createevent").post(AddnewEvent);
 router.route('/allevents').get(isAuthenticated,authorizeAdmin,GetAllEvents);
