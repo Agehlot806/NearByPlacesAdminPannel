@@ -5,6 +5,7 @@ import { Event } from "../models/Event.js";
 import {instance} from "../server.js"
 import { User } from "../models/User.js";
 
+
 export const ReservationCheckout = catchAsyncError(async (req, res, next)  => {
     const eventId = req.params.id;
     const userId = req.user ? req.user._id : null;

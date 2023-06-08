@@ -91,7 +91,7 @@ type:String,
   BookingStatus: {
     type: String,
     required: true,
-    default: "Processing",
+    default: "Pending",
   },
   createdAt: {
     type: Date,
