@@ -1,5 +1,5 @@
 import express from "express";
-import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, createStoreReviews, getStoreReview,deleteReview, getStoreBYId, GetAllStoresRecentAdded, getAllStoreReviews, subscriptionPlanForMerchant, getallSubscription, updateSubscription, getallSubscriptionById} from "../controllers/managestoreController.js";
+import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, createStoreReviews, getStoreReview,deleteReview, getStoreBYId, GetAllStoresRecentAdded, getAllStoreReviews, subscriptionPlanForMerchant, getallSubscription, updateSubscription, getallSubscriptionById, deleteSubscription} from "../controllers/managestoreController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 const router = express.Router();
 router.route("/addnewstore/:categoryId/stores").post(isAuthenticated,AddnewStore);
@@ -14,6 +14,8 @@ router.route("/addsubscriptionplan").post(subscriptionPlanForMerchant)
 router.route("/getallsubscription").get(getallSubscription);
 router.route("/updatesubscription/:id").put(updateSubscription)
 router.route("/getallsubscription/:id").get(getallSubscriptionById)
+router.route("/subscription/:id").delete(deleteSubscription)
+
 
 
 

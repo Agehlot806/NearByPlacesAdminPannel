@@ -418,3 +418,15 @@ export const getallSubscriptionById= catchAsyncError(async(req,res,next)=>{
     subscription
   })
 })
+
+//delete the subscriptionById 
+export const deleteSubscription= catchAsyncError(async(req,res,next)=>{
+  const subscription = await Subscription.findById(req.params.id);
+  if(!subscription)
+  return next(new ErrorHandler("failed to delete the subscription"));
+  await subscription.deleteOne();
+  res.status(200).json({
+    success:true,
+    message:"Subscription deleted successfully"
+  })
+})
