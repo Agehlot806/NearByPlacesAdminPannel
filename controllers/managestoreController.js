@@ -3,8 +3,12 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import ApiFeatures from "../utils/apifeatures.js";
 import { Category } from "../models/Application.js";
-import { storeupload } from "../middlewares/multer.js";
+import { storeupload, subscriptionUpload } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
+import { User } from "../models/User.js";
+import { Subscription } from "../models/SubscriptionMerchant.js";
+
+
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
     storeupload(req,res,async(err)=>{
       if (err)
@@ -319,5 +323,98 @@ export const getAllStoreReviews = catchAsyncError(async (req, res, next) => {
 });
 
 
+//Store Subscription apis starts here  
+export const subscriptionPlanForMerchant = catchAsyncError(async(req,res,next)=>{
+subscriptionUpload(req, res, async (err) => {
+  if (err)
+    return next(new ErrorHandler("failed to upload image try again later"))
+    const{subname,subprice,Details} = req.body;
+    if(!subname||!subprice)
+    return next(new ErrorHandler("Please enter all field", 400));
+    let subscription = await Subscription.findOne({ subname });
+    if (subscription) return next(new ErrorHandler("Subscription Already Exist", 409));
+    const subavatar = req.file.location;
+subscription = await Subscription.create({
+    subname,
+    subprice,
+    subimage: subavatar,
+    Details
+    
+  })
+  await subscription.save();
+  res.status(201).json({
+    success:true,
+    message:"subscription added successfully",
+    subscription
+  })
+});
+})
 
 
+//edit subscription plan 
+export const updateSubscription = catchAsyncError(async (req, res, next) => {
+  const subscriptionId = req.params.id;
+subscriptionUpload(req, res, async (err) => {
+  if (err)
+    return next(new ErrorHandler("failed to update image"))
+  const {subname,Details,subprice} = req.body;
+  const updates = {};
+  if (subname) {
+    updates.subname = subname;
+  }
+  if (Details) {
+    updates.Details = Details;
+  }
+  if (subprice) {
+    updates.subprice = subprice;
+  }
+  if (req.file) {
+    const photoUrlValue = req.file.location;
+    updates.subimage = photoUrlValue;
+  }
+  try{
+    const subscription = await Subscription.findById(subscriptionId);        
+    if(!subscription)
+    return next(new ErrorHandler("subscription not found"));
+    if (updates.subimage && subscription.subimage) {
+      await deleteFromS3(subscription.subimage);
+    }
+      Object.assign(subscription, updates);
+      await subscription.save();
+      res.status(200).json({
+        success:true,
+        message:"subscription update successfully",
+        subscription,
+      })
+    
+  }catch(err){
+    res.status(500).json({
+      success:false,
+      message:"failed to update subscription",
+      error:err.message,
+    })
+  }
+});
+});
+
+//get all subscription 
+export const getallSubscription = catchAsyncError(async(req,res,next)=>{
+  const subscription = await Subscription.find();
+  res.status(200).json({
+    success:true,
+    message:"Getting all the subscription",
+    subscription
+  })
+})
+
+//get subscription byID
+export const getallSubscriptionById= catchAsyncError(async(req,res,next)=>{
+  const subscription = await Subscription.findById(req.params.id);
+  if(!subscription)
+  return next(new ErrorHandler("failed to get subscription"))
+  res.status(200).json({
+    success:true,
+    message:"Getting the subscription",
+    subscription
+  })
+})

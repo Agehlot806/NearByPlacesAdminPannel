@@ -41,6 +41,7 @@ const upload = (bucketName) =>
     { name: 'categoryicon', maxCount: 1 },
   ]);
 export const offerupload = upload("bookmyplaceimagebucket").single("offerimage");
+export const subscriptionUpload= upload("bookmyplaceimagebucket").single("subscriptionimage");
 
 const deleteFromS3 = async (url) => {
   const s3 = new aws.S3({
