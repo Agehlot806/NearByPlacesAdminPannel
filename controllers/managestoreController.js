@@ -7,33 +7,164 @@ import { storeupload, subscriptionUpload } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
 import { User } from "../models/User.js";
 import { Subscription } from "../models/SubscriptionMerchant.js";
+import {instance} from "../server.js";
+import crypto from "crypto";
+import { SubscriptionModel } from "../models/subscriptionMerchantPayment.js";
 
+
+// export const AddnewStore = catchAsyncError(async (req, res, next) => {
+//     storeupload(req,res,async(err)=>{
+//       if (err)
+//       return res.status(400).json({ success: false, message: err.message });
+//       const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
+//       const photoUrl1Value = req.files['storephoto'][0].location;
+//       const photoUrl2Value = req.files['storegallery'][0].location;
+//       if (!name||!latitude||!longitude||!phonenumber)
+//       return next(new ErrorHandler("please add all fields",400));
+//       let store = await Store.findOne({name})
+//       if(store)
+//       return next(new ErrorHandler("store already registerd",409));
+//       const {categoryId} = req.params;
+//       const newstoreobject = {
+//         name,phonenumber,website,details,videourl,latitude,longitude,storegallery:photoUrl2Value,storephoto:photoUrl1Value,status,storeownername,category:categoryId};
+//         store = new Store(newstoreobject);
+//         await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true});
+//         await store.save();
+//         res.status(201).json({
+//           success: true,
+//           message: "Store added Successfully.",
+//           store,
+//         });
+//     })
+//   });
 
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
-    storeupload(req,res,async(err)=>{
-      if (err)
+  storeupload(req, res, async (err) => {
+    if (err)
       return res.status(400).json({ success: false, message: err.message });
-      const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
-      const photoUrl1Value = req.files['storephoto'][0].location;
-      const photoUrl2Value = req.files['storegallery'][0].location;
-      if (!name||!latitude||!longitude||!phonenumber)
-      return next(new ErrorHandler("please add all fields",400));
-      let store = await Store.findOne({name})
-      if(store)
-      return next(new ErrorHandler("store already registerd",409));
-      const {categoryId} = req.params;
-      const newstoreobject = {
-        name,phonenumber,website,details,videourl,latitude,longitude,storegallery:photoUrl2Value,storephoto:photoUrl1Value,status,storeownername,category:categoryId};
-        store = new Store(newstoreobject);
-        await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true});
-        await store.save();
-        res.status(201).json({
-          success: true,
-          message: "Store added Successfully.",
-          store,
-        });
-    })
+    const { name, phonenumber, website, details, videourl, latitude, longitude, status, storeownername, subscriptionPlanId } = req.body;
+    const photoUrl1Value = req.files['storephoto'][0].location;
+    const photoUrl2Value = req.files['storegallery'][0].location;
+    if (!name || !latitude || !longitude || !phonenumber)
+      return next(new ErrorHandler("Please add all fields", 400));
+    let store = await Store.findOne({ name })
+    if (store)
+      return next(new ErrorHandler("Store already registered", 409));
+    const { categoryId } = req.params;
+    const newStoreObject = {
+      name, phonenumber, website, details, videourl, latitude, longitude, storegallery: photoUrl2Value, storephoto: photoUrl1Value, status, storeownername, category: categoryId, subscriptionPlan: subscriptionPlanId
+    };
+    store = new Store(newStoreObject);
+    await Category.findByIdAndUpdate(categoryId, { $push: { stores: store._id } }, { new: true });
+
+    // Get the subscription plan details from your system based on the subscriptionPlanId
+    const subscriptionPlan = await Subscription.findById(subscriptionPlanId);
+    const expirationDate = new Date();
+    console.log(expirationDate)
+    let ress =expirationDate.setDate(expirationDate.getDate() + subscriptionPlan.validityDays);
+    console.log("fafafafaff",ress);
+    const subscriptionobj ={
+      subscriptionplanId:subscriptionPlan._id,
+      subscriptionPrice:subscriptionPlan.subprice,
+      subscriptionDetails:subscriptionPlan.Details,
+      subscriptionImage:subscriptionPlan.subimage,
+      subscriptionName:subscriptionPlan.subname,
+      validityDays:expirationDate.toISOString(),
+    }
+
+    if (!subscriptionPlan) {
+      return next(new ErrorHandler("Invalid subscription plan", 400));
+    }
+
+   
+    store.subscriptionPlanData.push(subscriptionobj);
+
+    await store.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Store added successfully",
+      store,
+    });
+
+    const currentDate = new Date();
+    const timeDifference = expirationDate.getTime() - currentDate.getTime();
+    console.log(timeDifference)
+    if (timeDifference > 0) {
+      setTimeout(async () => {
+        await Store.findByIdAndUpdate(store._id, { $unset: { subscriptionPlanData: 1 } });
+      }, timeDifference);
+    }
   });
+});
+
+
+export const checkousubscription = catchAsyncError(async (req, res, next)  => {
+  const storeId = req.params.id;
+  const store = await Store.findById(storeId);
+  if (!store) {
+    return next(new ErrorHandler('Store not found', 404));
+  }
+  const options = {
+    amount: store.subscriptionPlanData[0].subscriptionPrice * 100,
+     // Amount in paise (e.g., for ₹10, amount = 1000)
+    currency: 'INR',
+    // receipt: stor, // Unique identifier for the transaction
+    payment_capture: 1, // Auto-capture the payment,
+  };
+  console.log(options)
+  try {
+    const order = await instance.orders.create(options);
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create Razorpay order',
+    });
+  }
+});
+
+
+
+
+
+
+
+//payment verification subscription plan 
+export const paymentVerificationofSubscription = catchAsyncError(async(req,res,next)=>{
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+  req.body;
+
+const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+const expectedSignature = crypto
+  .createHmac("sha256", process.env.RAZORPAY_APT_SECRET)
+  .update(body.toString())
+  .digest("hex");
+
+const isAuthentic = expectedSignature === razorpay_signature;
+if (isAuthentic) {
+  await SubscriptionModel.create({
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  });
+
+  res.redirect(
+    `http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`
+  );
+} else {
+  res.status(400).json({
+    success: false,
+  });
+}
+})
+
 
 
   export const GetAllStores  = catchAsyncError(async (req, res, next) => {
@@ -328,7 +459,7 @@ export const subscriptionPlanForMerchant = catchAsyncError(async(req,res,next)=>
 subscriptionUpload(req, res, async (err) => {
   if (err)
     return next(new ErrorHandler("failed to upload image try again later"))
-    const{subname,subprice,Details} = req.body;
+    const{subname,subprice,Details,validityDays} = req.body;
     if(!subname||!subprice)
     return next(new ErrorHandler("Please enter all field", 400));
     let subscription = await Subscription.findOne({ subname });
@@ -338,7 +469,8 @@ subscription = await Subscription.create({
     subname,
     subprice,
     subimage: subavatar,
-    Details
+    Details,
+    validityDays
     
   })
   await subscription.save();
@@ -357,7 +489,7 @@ export const updateSubscription = catchAsyncError(async (req, res, next) => {
 subscriptionUpload(req, res, async (err) => {
   if (err)
     return next(new ErrorHandler("failed to update image"))
-  const {subname,Details,subprice} = req.body;
+  const {subname,Details,subprice,validityDays} = req.body;
   const updates = {};
   if (subname) {
     updates.subname = subname;
@@ -367,6 +499,9 @@ subscriptionUpload(req, res, async (err) => {
   }
   if (subprice) {
     updates.subprice = subprice;
+  }
+  if (validityDays) {
+    updates.validityDays = validityDays;
   }
   if (req.file) {
     const photoUrlValue = req.file.location;

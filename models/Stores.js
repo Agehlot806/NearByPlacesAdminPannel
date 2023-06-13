@@ -110,6 +110,35 @@ const schema = new mongoose.Schema({
   
         }
       ],
+      subscriptionPlanData:[
+     { 
+      
+        subscriptionplanId:{
+          type:mongoose.Schema.Types.ObjectId,
+          ref:"Subscription"
+        },
+        subscriptionPrice:{
+          type:Number,
+        },
+        subscriptionDetails:{
+          type:String
+        },
+        subscriptionImage:{
+          type:String
+        },
+        subscriptionName:{
+          type:String,
+        },
+        validityDays:{
+          type:Date,
+        }
+       
+      
+      
+      }
+      
+
+    ]
       
     
 });
