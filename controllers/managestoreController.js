@@ -44,6 +44,18 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
       resultPerPage
     });
   });
+ 
+
+  export const GetAllStoresRecentAdded = catchAsyncError(async (req, res, next) => {
+    const store = await Store.find().populate("category","categoryname")
+    const recentStores = store.reverse().slice(0, 5);
+    res.status(200).json({
+      success:true,
+      store:recentStores,
+    })
+  });
+  
+
 
   export const getStoreBYId = catchAsyncError(async (req, res, next) => {
     const stores = await Store.findById(req.params.id);
@@ -199,6 +211,7 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
       name: req.user.name,
       rating: Number(rating),
       comment,
+      image:req.user.adminavatar,
     };
     const store = await Store.findById(StoreId);
     const isReviewed = store.reviews.find(
@@ -290,4 +303,21 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
   });
 
 
-//
+//get all reviews of all store
+export const getAllStoreReviews = catchAsyncError(async (req, res, next) => {
+  const stores = await Store.find();
+  let allReviews = [];
+
+  stores.forEach((store) => {
+    allReviews = allReviews.concat(store.reviews);
+  });
+
+  res.status(200).json({
+    success: true,
+    reviews: allReviews,
+  });
+});
+
+
+
+

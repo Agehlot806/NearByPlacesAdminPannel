@@ -23,7 +23,7 @@ const schema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["admin","user","staff"],
+    enum: ["admin","user","merchant"],
     default: "user",
   },
     adminavatar:{
@@ -40,6 +40,13 @@ const schema = new mongoose.Schema({
     resetPasswordToken:String,
     resetPasswordExpire:String,
     fcmToken: String,
+
+    // merchant register section 
+    phone:Number,
+    otp:Number,
+    uid:String,
+    refreshToken:String,
+
 });
 
 schema.pre("save", async function (next) {
@@ -73,6 +80,8 @@ schema.methods.getResetToken = function () {
 
 
 export const User = mongoose.model("User",schema);
+
+
 
 
 

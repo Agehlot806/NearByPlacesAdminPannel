@@ -3,6 +3,8 @@ import { config} from "dotenv";
 import ErrorMiddleware from "./middlewares/Error.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import passport from "passport";
+import session from "express-session";
 const app = express();
 config({
     path:"./config/config.env"
@@ -18,6 +20,7 @@ app.use(
 
 app.use(cookieParser());
 
+
 // app.use(bodyParser({
 //     urlencoded:true
 // }))
@@ -28,6 +31,18 @@ app.use(
 		methods: ["GET", "POST", "PUT", "DELETE"],
 	})
 );
+
+app.use(
+  session({
+    secret: "your_secret_key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 //importing routes
 import admin from "./routes/userRoutes.js";

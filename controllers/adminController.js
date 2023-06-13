@@ -7,6 +7,9 @@ import crypto from "crypto"
 import { uploadsingle } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
 import admin from "firebase-admin";
+import { Merchant } from "../models/Merchant.js";
+
+
 // import serviceAccount from '../book-my-place-tarun-firebase-adminsdk-hnvjf-04ae09427e.json' assert { type: 'json' };
 const serviceAccount ={
   "type": "service_account",
@@ -25,8 +28,6 @@ const serviceAccount ={
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
-
 
 export const registerUser = catchAsyncError(async (req, res, next) => {
     uploadsingle(req, res, async (err) => {
@@ -53,6 +54,13 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
         sendToken(res, user, `${user.role} added Successfully`, 201);
     });
   });
+
+
+
+
+
+
+
 
   // export const SendNotification = catchAsyncError(async(req,res,next)=>{
   //   try {
@@ -110,52 +118,6 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
   
   
-  
-
-  // export const SendNotification = catchAsyncError(async (req, res, next) => {
-  //   try {
-  //     const tokens = await fetchTokensFromDatabase();
-  
-  //     const message = {
-  //       notification: {
-  //         title: 'New Notification',
-  //         body: 'www.google.com',
-  //       },
-  //       tokens: tokens,
-  //     };
-  
-  //     const response = await admin.messaging().sendMulticast(message)
-  
-  //     console.log('Notification sent:', response);
-  
-  //     const { successCount, failureCount } = response;
-  
-  //     // Check the delivery status of each user
-  //     const deliveryStatus = [];
-  //     response.responses.forEach((result, index) => {
-  //       if (result.success) {
-  //         deliveryStatus.push({
-  //           user: tokens[index],
-  //           status: 'Delivered',
-  //         });
-  //       } else {
-  //         deliveryStatus.push({
-  //           user: tokens[index],
-  //           status: 'Failed',
-  //           error: result.error,
-  //         });
-  //       }
-  //     });
-  
-  //     console.log('Delivery status:', deliveryStatus);
-  
-  //     res.sendStatus(200);
-  //   } catch (error) {
-  //     console.error('Error sending notifications:', error);
-  //     res.sendStatus(500);
-  //   }
-  // });
-  
 
   async function fetchTokensFromDatabase() {
     try {
@@ -168,6 +130,42 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       throw error;
     }
   }
+
+
+
+  export const merchantRegister = catchAsyncError(async(req,res,next)=>{
+    try {
+      const {phonenumber, uid,refreshToken } = req.body;
+      const merchant = new Merchant({
+        phonenumber,
+        refreshToken,
+        uid
+      });
+
+      await merchant.save();
+      res.status(201).json({
+        success:true,
+        message:"merchant added successfully",
+        merchant,
+      })
+      
+    } catch (error) {
+      console.error('Error registering user:', error);
+      res.status(500).json({ error: 'Failed to register user' });
+    }
+
+  })
+
+
+
+
+
+
+
+
+
+
+
 
 
   
@@ -193,7 +191,7 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       .cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
-        secure: true,  
+        // secure: true,  
         sameSite: "none",
       })
       .json({
@@ -414,6 +412,63 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       usersProfit,
     });
   });
+  
+
+  
+  // export const sendEmailtoAll = catchAsyncError(async (req, res, next) => {
+  //   const users = await User.find({}, 'email');
+  //   const url = process.env.FRONTEND_URL;
+  //   const message = `Click on the link to reset your password: ${url}. If you have not requested this, please ignore.`;
+  
+  //   const emailPromises = users.map(user => sendEmail(user.email, 'Notification for all', message));
+  
+  //   await Promise.all(emailPromises);
+  
+  //   res.status(200).json({
+  //     success: true,
+  //     message: 'Emails sent successfully',
+  //   });
+  // });
+
+  export const sendEmailtoAll = catchAsyncError(async (req, res, next) => {
+    try {
+      const { recipients, title, body } = req.body; // Assuming recipients, title, and body are sent in the request body
+  
+      let roleQuery = {}; // Empty object to hold the role query
+  
+      // Check the selected recipients and create the role query accordingly
+      if (recipients === "user") {
+        roleQuery = { role: "user" };
+      } else if (recipients === "admin") {
+        roleQuery = { role: "admin" };
+      } else if (recipients === "all") {
+        roleQuery = { role: { $in: ["user", "admin"] } };
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid recipient selection",
+        });
+      }
+  
+      const users = await User.find(roleQuery, "email"); // Retrieve users based on the role query
+  
+      const emailPromises = users.map(async (user) => {
+        await sendEmail(user.email, title, body); // Use the provided title and body for each email
+      });
+  
+      await Promise.all(emailPromises);
+  
+      res.status(200).json({
+        success: true,
+        message: "Emails sent successfully",
+      });
+    } catch (error) {
+      console.error("Error sending emails:", error);
+      res.status(500).json({ success: false, message: "Failed to send emails" });
+    }
+  });
+  
+  
   
 
 

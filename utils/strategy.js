@@ -1,14 +1,15 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as FacebookStrategy } from 'passport-facebook';
+import { User } from '../models/User.js';
 
 // Google OAuth2 configuration
 passport.use(
   new GoogleStrategy(
     {
-      clientID: 'YOUR_GOOGLE_CLIENT_ID',
-      clientSecret: 'YOUR_GOOGLE_CLIENT_SECRET',
-      callbackURL: 'http://localhost:3000/auth/google/callback',
+    clientID:'1035606224578-fg0f8e56fsm4jfk2f4hqusf9fgqainh2.apps.googleusercontent.com',
+    clientSecret: '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',
+    callbackURL: 'http://localhost:3000/',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -33,10 +34,10 @@ passport.use(
 passport.use(
   new FacebookStrategy(
     {
-      clientID: 'YOUR_FACEBOOK_APP_ID',
-      clientSecret: 'YOUR_FACEBOOK_APP_SECRET',
-      callbackURL: 'http://localhost:3000/auth/facebook/callback',
-      profileFields: ['id', 'displayName', 'email'],
+    clientID: '610783947337862',
+	clientSecret: '6041bb6cad2e8f9aaa7c84fe1880f4ca',
+    callbackURL: '/auth/facebook/callback',
+    profileFields: ['id', 'displayName', 'email'],
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -56,3 +57,20 @@ passport.use(
     }
   )
 );
+
+// Serialize user
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+// Deserialize user
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+export default passport;

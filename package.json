@@ -25,6 +25,8 @@
     "datauri": "^4.1.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "firebase": "^9.22.1",
     "firebase-admin": "^11.9.0",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.0",
