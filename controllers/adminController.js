@@ -4,11 +4,10 @@ import { sendToken } from "../utils/sendToken.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import crypto from "crypto"
-import { uploadsingle } from "../middlewares/multer.js";
+import { categoryUpload, uploadsingle } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
 import admin from "firebase-admin";
 import { Merchant } from "../models/Merchant.js";
-
 
 // import serviceAccount from '../book-my-place-tarun-firebase-adminsdk-hnvjf-04ae09427e.json' assert { type: 'json' };
 const serviceAccount ={
@@ -154,18 +153,7 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       res.status(500).json({ error: 'Failed to register user' });
     }
 
-  })
-
-
-
-
-
-
-
-
-
-
-
+  });
 
 
   
@@ -351,7 +339,6 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
 
   export const getDashboardStats = catchAsyncError(async (req, res, next) => {
     const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(12);
-  
     const statsData = [];
   
     for (let i = 0; i < stats.length; i++) {
@@ -362,35 +349,43 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
     for (let i = 0; i < requiredSize; i++) {
       statsData.unshift({
         users: 0,
-        subscription: 0,
-        views: 0,
+        merchant: 0,
+        offer: 0,
+        events:0,
+
       });
     }
   
     const usersCount = statsData[11].users;
-    const subscriptionCount = statsData[11].subscription;
-    const viewsCount = statsData[11].views;
+    const merchantCount = statsData[11].merchant;
+    const offerCount = statsData[11].offer;
+    const eventCount = statsData[11].events;
   
     let usersPercentage = 0,
-      viewsPercentage = 0,
-      subscriptionPercentage = 0;
+      merchantPercentage = 0,
+      offerPercentage = 0,
+      eventPercentage =0;
+
     let usersProfit = true,
-      viewsProfit = true,
-      subscriptionProfit = true;
+      merchantProfit = true,
+      offerProfit = true,
+      eventProfit = true;
   
     if (statsData[10].users === 0) usersPercentage = usersCount * 100;
-    if (statsData[10].views === 0) viewsPercentage = viewsCount * 100;
-    if (statsData[10].subscription === 0)
-      subscriptionPercentage = subscriptionCount * 100;
+    if (statsData[10].merchant === 0) merchantPercentage = merchantCount * 100;
+    if (statsData[10].offer === 0) offerPercentage = offerCount * 100;
+    if (statsData[10].events === 0) eventPercentage = eventCount * 100;
+
     else {
       const difference = {
         users: statsData[11].users - statsData[10].users,
-        views: statsData[11].views - statsData[10].views,
-        subscription: statsData[11].subscription - statsData[10].subscription,
+        merchant: statsData[11].merchant - statsData[10].merchant,
+        offer: statsData[11].offer - statsData[10].offer,
+        events:statsData[11].events-statsData[10].events,
       };
   
       usersPercentage = (difference.users / statsData[10].users) * 100;
-      viewsPercentage = (difference.views / statsData[10].views) * 100;
+      merchantPercentage = (difference.merchant / statsData[10].merchant) * 100;
       subscriptionPercentage =
         (difference.subscription / statsData[10].subscription) * 100;
       if (usersPercentage < 0) usersProfit = false;
@@ -467,7 +462,6 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       res.status(500).json({ success: false, message: "Failed to send emails" });
     }
   });
-  
   
   
 

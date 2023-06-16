@@ -70,4 +70,3 @@ export const getcmsbyId = catchAsyncError(async(req,res,next)=>{
 });
 
 
-

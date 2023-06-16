@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import passport from "passport";
 import session from "express-session";
+import { ApiConfig } from "./models/ApiConfigModel.js";
 const app = express();
 config({
     path:"./config/config.env"
@@ -57,18 +58,40 @@ import application from "./routes/applicationRoutes.js"
 import booking from "./routes/bookingRoutes.js";
 import reservation from "./routes/reservationRoutes.js";
 
-app.use("/api/v1", admin);
-app.use("/api/v1",stores);
-app.use("/api/v1",offer);
-app.use("/api/v1",event);
-app.use("/api/v1",messages);
-app.use("/api/v1",table);
-app.use("/api/v1",csvData);
-app.use("/api/v1",payment);
-app.use("/api/v1",application);
-app.use("/api/v1",booking);
-app.use("/api/v1",reservation);
+let baseurl = "/api/v1";
 
+app.use(baseurl, admin);
+app.use(baseurl,stores);
+app.use(baseurl,offer);
+app.use(baseurl,event);
+app.use(baseurl,messages);
+app.use(baseurl,table);
+app.use(baseurl,csvData);
+app.use(baseurl,payment);
+app.use(baseurl,application);
+app.use(baseurl,booking);
+app.use(baseurl,reservation);
+
+// let baseurldata = 
+// ApiConfig.findOne({}, (err, doc) => {
+//   if (err) {
+//     console.error("Error retrieving base URL from the database:", err);
+//   } else if (doc) {
+//     baseUrl = doc.baseUrl;
+//     console.log("Base URL retrieved from the database:", baseUrl);
+//   }
+// });
+
+// app.get('/base-url', (req, res) => {
+//   res.json({ baseurl });
+// });
+
+// // Endpoint to change the base URL
+// app.put('/base-url-update', (req, res) => {
+//   const { newBaseUrl } = req.body;
+//   baseurl = newBaseUrl;
+//   res.json({ message: 'Base URL updated successfully.' });
+// });
 
 
 
@@ -77,10 +100,14 @@ app.get("/api/v1/getkey", (req, res) =>
 );
 
 
+
+
 export default app;
 app.get("/", (req, res) =>
   res.send(
     `<h1>Site is Working. click <a href=${process.env.FRONTEND_URL}>here</a> to visit frontend.</h1>`
   )
 );
+
+
 app.use(ErrorMiddleware);
