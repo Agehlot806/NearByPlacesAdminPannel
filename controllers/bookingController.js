@@ -55,13 +55,25 @@ export const myBookings = catchAsyncError(async (req, res, next) => {
   export const getAllBookings = catchAsyncError(async (req, res, next) => {
     const bookings = await Booking.find();
     let totalAmount = 0;
+    let confirmed = 0;
+    let pending = 0;
     bookings.forEach((booking) => {
         totalAmount += booking.totalPrice;
+       if(booking.BookingStatus == "true")
+       {
+           confirmed = confirmed + 1;
+
+       }
+       else{
+        pending = pending + 1;
+       }
     });
     res.status(200).json({
       success: true,    
       totalAmount,
       bookings,
+      confirmed,
+      pending
     });
   });
 
