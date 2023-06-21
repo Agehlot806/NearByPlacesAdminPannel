@@ -177,25 +177,58 @@ export const permissiontake = async (req, res) => {
 };
 
 export const GetAllEvents = catchAsyncError(async (req, res, next) => {
-  const resultPerPage = 5;
-  const EventCounts = await Event.countDocuments();
-  const apiFeature = new ApiFeatures(Event.find(), req.query).search().filter().pagination(resultPerPage);
-  let events = await apiFeature.query;
+  console.log(req.user, 'user');
+  var validate;
+  var length1 = req.user.permission.length;
+  console.log(length1, 'length');
+  // var validate;
+  for (var i = 0; i < length1; i++) {
 
-  // Retrieve user participation count for each event
-  const eventCounts = await Promise.all(
-    events.map(async (event) => {
-      const userCount = event.usersparticipated.length;
-      return { ...event._doc, userCount }; // Include userCount in the event object
+    var b = req.user.permission[i];
+    var c = { readAny: "event" }
+
+    console.log(JSON.stringify(c), 'cccccc')
+
+    console.log(JSON.stringify(b), 'bbbbbbbbb')
+
+    if (JSON.stringify(c) === JSON.stringify(b))
+  {   validate = req.user.permission[i];
+
+    console.log(req.user.permission[i], 'iiii')
+    console.log(validate, 'validate')
+  }
+
+
+
+  }
+  if ( validate != undefined || req.user.role == "admin") {
+    const resultPerPage = 5;
+    const EventCounts = await Event.countDocuments();
+    const apiFeature = new ApiFeatures(Event.find(), req.query).search().filter().pagination(resultPerPage);
+    let events = await apiFeature.query;
+  
+    // Retrieve user participation count for each event
+    const eventCounts = await Promise.all(
+      events.map(async (event) => {
+        const userCount = event.usersparticipated.length;
+        return { ...event._doc, userCount }; // Include userCount in the event object
+      })
+    );
+  
+    res.status(200).json({
+      success: true,
+      events: eventCounts, // Use eventCounts instead of the original events array
+      EventCounts,
+      resultPerPage,
+    });
+  }
+  else{
+    res.status(400).json({
+      success:false,
+      message:"you are not authenticate user Reachout Admin for More"
     })
-  );
-
-  res.status(200).json({
-    success: true,
-    events: eventCounts, // Use eventCounts instead of the original events array
-    EventCounts,
-    resultPerPage,
-  });
+  }
+  
 });
 
 
