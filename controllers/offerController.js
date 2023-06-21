@@ -62,6 +62,31 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
   });
 
   export const GetallOffers  = catchAsyncError(async (req, res, next) => {
+  console.log(req.user, 'user');
+  var validate;
+  var length1 = req.user.permission.length;
+  console.log(length1, 'length');
+  // var validate;
+  for (var i = 0; i < length1; i++) {
+
+    var b = req.user.permission[i];
+    var c = { readAny: "offer" }
+
+    console.log(JSON.stringify(c), 'cccccc')
+
+    console.log(JSON.stringify(b), 'bbbbbbbbb')
+
+    if (JSON.stringify(c) === JSON.stringify(b))
+  {   validate = req.user.permission[i];
+
+    console.log(req.user.permission[i], 'iiii')
+    console.log(validate, 'validate')
+  }
+
+
+
+  }
+  if ( validate != undefined || req.user.role == "admin") {
     const resultPerPage =5;
     const offercount = await Offer.countDocuments();
     const apiFeature = new ApiFeatures(Offer.find(),req.query).search().filter().pagination(resultPerPage);
@@ -72,6 +97,15 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
       offercount,
       resultPerPage
     });
+  }
+  else{
+    res.status(400).json({
+      success:false,
+      message:"you do not have access reactout admin"
+    })
+  }
+
+   
   });
 
 
