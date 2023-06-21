@@ -37,6 +37,13 @@ const schema = new mongoose.Schema({
         type:Date,
         default:Date.now,
     },
+    permission:[
+        
+{
+  
+}
+
+],
     resetPasswordToken:String,
     resetPasswordExpire:String,
     fcmToken: String,
