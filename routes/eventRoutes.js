@@ -6,7 +6,7 @@ const router = express.Router();
 router.route("/createevent").post(isAuthenticated, AddnewEvent);
 router.route('/allevents').get(isAuthenticated,GetAllEvents);
 router.route("/allevent/:id").get(getEventById);
-router.route("/events/:id").put(isAuthenticated,authorizeAdmin,UpdateEvent).delete(isAuthenticated,DeleteEventById);
+router.route("/events/:id").put(isAuthenticated,UpdateEvent).delete(isAuthenticated,DeleteEventById);
 router.route("/addparticipanttoevent").put(isAuthenticated,addparticipantToEvent);
 router.route("/allparticipant").get(getallEventParticipants);
 router.route("/allparticipant").delete(isAuthenticated,deleteparticipantfromEvent);
