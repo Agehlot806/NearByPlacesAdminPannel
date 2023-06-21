@@ -12,15 +12,6 @@ const ac = new AccessControl();
 export const roles = (function () {
   ac.grant("user")
     .readAny("event")
-  //  .readOwn("profile")
-  //  .updateOwn("profile")
-
-  // ac.grant("merchant")
-  //  .extend("basic")
-  //  .readAny("profile")
-
-
-
   ac.grant("admin")
     .createAny('event')
     .readAny('event')
@@ -30,9 +21,11 @@ export const roles = (function () {
     .updateAny('offer')
     .deleteAny('offer')
     .readAny('offer')
-  //  .revoke("user")
+    .createAny('store')
+    .updateAny('store')
+    .deleteAny('store')
+    .readAny('store')
 
-  // ac.grant("permissions")
   return ac;
 })();
 
@@ -63,13 +56,10 @@ export const AddnewEvent = catchAsyncError(async (req, res, next) => {
 
   }
 
-
-
-
   eventuplaod(req, res, async (err) => {
     if (err)
       return next(new ErrorHandler("failed to upload event image try again later"));
-    if ( validate != undefined || req.user.roles == "admin") {
+    if ( validate != undefined || req.user.role == "admin") {
       const { eventname, description, datebegin, dateend, phonenumber, website, location1, address, status, storeId, EventType, EventPrice } = req.body;
       if (!eventname || !address || !phonenumber || !EventType)
         return next(new ErrorHandler("please add all fields", 400))
@@ -275,55 +265,83 @@ export const DeleteEventById = catchAsyncError(async (req, res, next) => {
   });
 
 }
+else {
+  res.status(400).json({
+    success: false,
+    message: "you are not authenticated"
+  })
+}
  });
-
 
 
 export const UpdateEvent = catchAsyncError(async (req, res, next) => {
   const eventId = req.params.id;
+  console.log(req.user, 'user');
+  var validate;
+  var length1 = req.user.permission.length;
+  console.log(length1, 'length');
+  // var validate;
+  for (var i = 0; i < length1; i++) {
+
+    var b = req.user.permission[i];
+    var c = { deleteAny: "event" }
+
+    console.log(JSON.stringify(c), 'cccccc')
+
+    console.log(JSON.stringify(b), 'bbbbbbbbb')
+
+    if (JSON.stringify(c) === JSON.stringify(b))
+  {   validate = req.user.permission[i];
+
+    console.log(req.user.permission[i], 'iiii')
+    console.log(validate, 'validate')
+  }
+
+
+
+  }
   eventuplaod(req, res, async (err) => {
     if (err)
       return next(new ErrorHandler("failed to update image"));
-    const { eventname, description, datebegin, dateend, phonenumber, website, location, address, status, storeId } = req.body;
-    const updates = {};
-    if (eventname) updates.eventname = eventname;
-    if (description) updates.description = description;
-    if (datebegin) updates.datebegin = datebegin;
-    if (dateend) updates.dateend = dateend;
-    if (phonenumber) updates.phonenumber = phonenumber;
-    if (website) updates.website = website;
-    if (location1) updates.location1 = location1;
-    if (address) updates.address = address;
-    if (status) updates.status = status;
-    if (storeId) updates.storeId = storeId;
-    if (EventPrice) updates.EventPrice = EventPrice;
-    if (req.file) {
-      const eventurlValue = req.file.location;
-      updates.eventimage = eventurlValue;
-    }
-    try {
-      const event = await Event.findById(eventId);
-      if (!event)
-        return next(new ErrorHandler("event not found"));
-      if (updates.eventimage && event.eventimage) {
-        await deleteFromS3(event.eventimage);
+      if ( validate != undefined || req.user.roles == "admin") {
+        const { eventname, description, datebegin, dateend, phonenumber, website, EventPrice, location1, address, status, storeId } = req.body;
+        const updates = {};
+        if (eventname) updates.eventname = eventname;
+        if (description) updates.description = description;
+        if (datebegin) updates.datebegin = datebegin;
+        if (dateend) updates.dateend = dateend;
+        if (phonenumber) updates.phonenumber = phonenumber;
+        if (website) updates.website = website;
+        if (location1) updates.location1 = location1;
+        if (address) updates.address = address;
+        if (status) updates.status = status;
+        if (storeId) updates.storeId = storeId;
+        if (EventPrice) updates.EventPrice = EventPrice;
+        if (req.file) {
+          const eventurlValue = req.file.location;
+          updates.eventimage = eventurlValue;
+        }
+          const event = await Event.findById(eventId);
+          if (!event)
+            return next(new ErrorHandler("event not found"));
+          if (updates.eventimage && event.eventimage) {
+            await deleteFromS3(event.eventimage);
+          }
+          Object.assign(event, updates);
+          await event.save();
+          res.status(200).json({
+            success: true,
+            message: "Event updated successfully",
+            event
+          })
       }
-      Object.assign(event, updates);
-      await event.save();
-      res.status(200).json({
-        success: true,
-        message: "Event updated successfully",
-        event
-      })
-
-    }
-    catch (err) {
-      res.status(500).json({
-        success: false,
-        message: "failed to update profile",
-        error: err.message,
-      })
-    }
+      else {
+        res.status(400).json({
+          success: false,
+          message: "you are not authenticated"
+        })
+      }
+  
   })
 });
 
