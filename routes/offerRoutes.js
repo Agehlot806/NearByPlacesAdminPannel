@@ -4,7 +4,7 @@ import { isAuthenticated } from "../middlewares/auth.js";
 const router = express.Router();
 
 router.route("/createnewoffer").post(isAuthenticated,AddnewOffer);
-router.route("/alloffers").get(GetallOffers);
+router.route("/alloffers").get(isAuthenticated,GetallOffers);
 router.route("/offer/:id").put(isAuthenticated,UpdateOffer).delete(isAuthenticated,DeleteOffer);
 router.route("/offers/:id").get(GetOfferById);
 
