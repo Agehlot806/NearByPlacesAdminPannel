@@ -5,7 +5,7 @@ const router = express.Router();
 router.route("/addnewstore/:categoryId/stores").post(isAuthenticated,AddnewStore);
 router.route("/checkout/:id").post(checkousubscription)
 router.route("/subscriptionverification").post(paymentVerificationofSubscription);
-router.route("/allstores").get(GetAllStores);
+router.route("/allstores").get(isAuthenticated,GetAllStores);
 router.route("/stores/:id").delete(isAuthenticated,DeleteStore).put(isAuthenticated,UpdateStore);
 router.route("/review").put(isAuthenticated, createStoreReviews);
 router.route("/reviews").get(getStoreReview);
