@@ -156,7 +156,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
     for (var i = 0; i < length1; i++) {
   
       var b = req.user.permission[i];
-      var c = { deleteAny: "offer" }
+      var c = { updateAny: "offer" }
   
       console.log(JSON.stringify(c), 'cccccc')
   
@@ -173,7 +173,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
       if (err) {
         return next(new ErrorHandler("Failed to update image"));
       }
-      if ( validate != undefined || req.user.roles == "admin") {
+      if ( validate != undefined || req.user.role == "admin") {
         const {offername,description,PricingOfferValue,coupon_type,value,coupon_code,status,datebegin,dateend,offerstore,priceUsd,percent} = req.body;
         const updates = {};
         if (offername) updates.offername = offername;
