@@ -317,7 +317,7 @@ export const UpdateEvent = catchAsyncError(async (req, res, next) => {
   for (var i = 0; i < length1; i++) {
 
     var b = req.user.permission[i];
-    var c = { deleteAny: "event" }
+    var c = { updateAny: "event" }
 
     console.log(JSON.stringify(c), 'cccccc')
 
@@ -336,7 +336,7 @@ export const UpdateEvent = catchAsyncError(async (req, res, next) => {
   eventuplaod(req, res, async (err) => {
     if (err)
       return next(new ErrorHandler("failed to update image"));
-      if ( validate != undefined || req.user.roles == "admin") {
+      if ( validate != undefined || req.user.role == "admin") {
         const { eventname, description, datebegin, dateend, phonenumber, website, EventPrice, location1, address, status, storeId } = req.body;
         const updates = {};
         if (eventname) updates.eventname = eventname;
