@@ -13,10 +13,54 @@ const schema  = new mongoose.Schema({
         type: String,
         required: true,
       },
-      eventId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Event"
-      }
+      eventId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Event',
+        required: true,
+      },
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      reservationId: {
+        type: String,
+        required: true,
+      },
+      ticketCount: {
+        type: Number,
+        required: true,
+      },
+      amount: {
+        type: Number,
+        required: true,
+      },
+      currency: {
+        type: String,
+        required: true,
+      },
+      receipt: {
+        type: String,
+        required: true,
+      },
+      status: {
+        type: String,
+        required: true,
+      },
+      notes: {
+        type: {
+          type: String,
+          required: true,
+        },
+        reservationId: {
+          type: String,
+          required: true,
+        },
+      },
+      created_at: {
+        type: Number,
+        required: true,
+      },
+  
     
 
 
