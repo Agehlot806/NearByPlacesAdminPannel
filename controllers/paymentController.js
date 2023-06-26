@@ -8,15 +8,15 @@ import { BookingModelDataModel } from "../models/BookingModelDataModel.js";
 import { BookingTable } from "../models/BookingTable.js";
 export const checkout = catchAsyncError(async (req, res, next)  => {
   const bookingId = req.params.id;
-  const booking = await BookingTable.findById(bookingId);
-  console.log(booking)
+  const booking = await Booking.findById(bookingId);
+  // console.log(booking)
 
   if (!booking) {
     return next(new ErrorHandler('Booking not found', 404));
   }
 
   const options = {
-    amount: booking.price * 100, // Amount in paise (e.g., for ₹10, amount = 1000)
+    amount: booking.table_price * 100, // Amount in paise (e.g., for ₹10, amount = 1000)
     currency: 'INR',
     receipt: booking._id +333,
     payment_capture: 1, // Auto-capture the payment
