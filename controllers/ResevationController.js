@@ -215,8 +215,6 @@ export const paymentVerificationofReservation = catchAsyncError(async (req, res,
     razorpay_signature,
    })
 
-    await reservation.save();
-
     res.redirect(`http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`);
   } else {
     res.status(400).json({
