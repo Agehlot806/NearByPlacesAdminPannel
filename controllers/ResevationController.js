@@ -5,6 +5,7 @@ import { Event } from "../models/Event.js";
 import {instance} from "../server.js"
 import { User } from "../models/User.js";
 import crypto from "crypto";
+import { Reservationpayment } from "../models/ResevationpaymentModel.js";
 
 
 // export const ReservationCheckout = catchAsyncError(async (req, res, next)  => {
@@ -208,21 +209,11 @@ export const paymentVerificationofReservation = catchAsyncError(async (req, res,
 
   const isAuthentic = expectedSignature === razorpay_signature;
   if (isAuthentic) {
-    const reservation = new Reservation({
-      eventId: req.body.eventId,
-      userId: req.body.userId,
-      reservationId: req.body.reservationId,
-      ticketCount: req.body.ticketCount,
-      amount: req.body.amount,
-      currency: req.body.currency,
-      receipt: req.body.receipt,
-      status: req.body.status,
-      notes: req.body.notes,
-      created_at: req.body.created_at,
-      razorpay_order_id: razorpay_order_id,
-      razorpay_payment_id: razorpay_payment_id,
-      razorpay_signature: razorpay_signature,
-    });
+   await Reservationpayment.create({
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+   })
 
     await reservation.save();
 
