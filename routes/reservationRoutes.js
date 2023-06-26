@@ -5,7 +5,7 @@ const router = express.Router();
 router.route("/reservation-checkout/:id").post(isAuthenticated,ReservationCheckout);
 router.route("/paymentverificationofreservation").post(paymentVerificationofReservation);
 router.route("/getallreservation").get(getallordersofReservation)
-router.route("/cancelledreservation/:reservationId").post(ReservationCancellation)
+router.route("/cancelledreservation/:id").post(ReservationCancellation)
 
 
 

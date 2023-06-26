@@ -4,23 +4,43 @@ import {instance} from "../server.js"
 import crypto from "crypto"
 import { Booking } from "../models/Booking.js";
 import { PaymentModel } from "../models/PaymentModel.js";
+import { BookingModelDataModel } from "../models/BookingModelDataModel.js";
+import { BookingTable } from "../models/BookingTable.js";
 export const checkout = catchAsyncError(async (req, res, next)  => {
   const bookingId = req.params.id;
-  const booking = await Booking.findById(bookingId);
+  const booking = await BookingTable.findById(bookingId);
+  console.log(booking)
 
   if (!booking) {
     return next(new ErrorHandler('Booking not found', 404));
   }
+
   const options = {
-    amount: booking.Tableprice * 100, // Amount in paise (e.g., for ₹10, amount = 1000)
+    amount: booking.price * 100, // Amount in paise (e.g., for ₹10, amount = 1000)
     currency: 'INR',
-    receipt: booking.bookingId, // Unique identifier for the transaction
-    payment_capture: 1, // Auto-capture the payment,
+    receipt: booking._id +333,
+    payment_capture: 1, // Auto-capture the payment
   };
-  console.log(options)
 
   try {
     const order = await instance.orders.create(options);
+
+    const orderData = new BookingModelDataModel({
+      id: order.id,
+      entity: order.entity,
+      amount: order.amount,
+      amount_paid: order.amount_paid,
+      amount_due: order.amount_due,
+      currency: order.currency,
+      receipt: order.receipt,
+      offer_id: order.offer_id,
+      status: order.status,
+      attempts: order.attempts,
+      notes: order.notes,
+      created_at: order.created_at,
+    });
+
+    await orderData.save();
 
     res.status(200).json({
       success: true,
@@ -34,6 +54,7 @@ export const checkout = catchAsyncError(async (req, res, next)  => {
     });
   }
 });
+
 
 
 export const paymentVerification = catchAsyncError(async(req,res,next)=>{
@@ -67,6 +88,19 @@ if (isAuthentic) {
   });
 }
 })
+
+
+export const changeBookingStatusfunc = catchAsyncError(async(req,res,next)=>{
+const razorpayOrderId = req.params.id;
+const orderdata = await PaymentModel.findOne({razorpay_order_id:razorpayOrderId});
+console.log(orderdata);
+
+})
+
+
+
+
+
 
 export const getallorders = catchAsyncError(async (req, res, next) => {
   try {

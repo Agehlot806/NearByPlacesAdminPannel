@@ -3,7 +3,7 @@ import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, createStoreReviews
 import { isAuthenticated } from "../middlewares/auth.js";
 const router = express.Router();
 router.route("/addnewstore/:categoryId/stores").post(isAuthenticated,AddnewStore);
-router.route("/checkout/:id").post(checkousubscription)
+router.route("/checkoutss/:id").post(checkousubscription)
 router.route("/subscriptionverification").post(paymentVerificationofSubscription);
 router.route("/allstores").get(isAuthenticated,GetAllStores);
 router.route("/stores/:id").delete(isAuthenticated,DeleteStore).put(isAuthenticated,UpdateStore);
