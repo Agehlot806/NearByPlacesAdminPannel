@@ -215,7 +215,7 @@ export const paymentVerificationofReservation = catchAsyncError(async (req, res,
     razorpay_signature,
    })
 
-    res.redirect(`http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`);
+    res.redirect(`https://demo7.progressiveaidata.in/paymentsuccess?reference=${razorpay_payment_id}`);
   } else {
     res.status(400).json({
       success: false,
