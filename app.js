@@ -11,7 +11,7 @@ config({
     path:"./config/config.env"
 })
 
-//using middlewares
+//using middlewares...
 app.use(express.json());
 app.use(
     express.urlencoded({
