@@ -187,7 +187,7 @@ if (isAuthentic) {
   });
 
   res.redirect(
-    `http://localhost:3000/paymentsuccess?reference=${razorpay_payment_id}`
+    `https://demo7.progressiveaidata.in/paymentsuccess?reference=${razorpay_payment_id}`
   );
 } else {
   res.status(400).json({
