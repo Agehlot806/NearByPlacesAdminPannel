@@ -77,11 +77,12 @@ const razorpayOrderId = req.params.id;
 const orderdata = await PaymentModel.findOne({razorpay_order_id:razorpayOrderId});
 console.log(orderdata);
 if(orderdata){
-const updateStatus = await Booking.findByIdAndUpdate(req.body.bookingId, {BookingStatus : "Confirmed"  })
+const updateStatus = await Booking.findByIdAndUpdate(req.body.bookingId, {BookingStatus : "Confirmed"  });
+const finalres = await updateStatus.save();
 console.log(updateStatus, 'status');
 res.status(200).json({
   message: "Booking Status updated Successfully",
-  updateStatus
+  finalres,
 })
 }
 else {

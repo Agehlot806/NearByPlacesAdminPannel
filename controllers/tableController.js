@@ -51,13 +51,35 @@ export const createTable = async(req, res, next) => {
   };
 }
 export const updatetableStatus = async(req,res,next) =>{
-  const bookingID = req.body;
-  const tableId = req.body;
+  const bookingID = req.body.bookingID;
+  const tableId = req.params.id;
   const bookingFind = await Booking.findById(bookingID);
-  console.log(bookingFind, 'bookingFind');
-  const tableFind = await BookingTable.findById(tableId);
-  console.log(tableFind, 'tableFind');
+  if(bookingFind.BookingStatus=="Confirmed"){
+    console.log(bookingFind, 'bookingFind');
+    const tableFind = await BookingTable.findByIdAndUpdate(tableId);
+    console.log(tableFind,"tablefinddata");
+    tableFind.tableStatus="Unavalable";
+   const finalres = await tableFind.save();
+   res.status(200).json({
+    success:true,
+    message:"Talbe status update successfully",
+    finalres,
+  })
+  }
+  else{
+    res.status(400).json({
+      success:false,
+      message:"slot not available",
+      finalres,
+    })
+
+  }
+  
 }
+
+
+
+
 export const updateTable = async (req, res, next) => {
   try {
     const updatetable = await BookingTable.findByIdAndUpdate(
