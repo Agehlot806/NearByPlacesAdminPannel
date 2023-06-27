@@ -24,6 +24,7 @@ export const createTable = async(req, res, next) => {
         table_no: req.body.table_no,
         location: req.body.location,
         store_id: req.params.storeId,
+        cancellation_charges:req.body.cancellation_charges,
         });
       const savedTable = await newTable.save();
       // try {

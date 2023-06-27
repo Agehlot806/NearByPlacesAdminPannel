@@ -116,6 +116,26 @@ export const ReservationCancellation = catchAsyncError(async (req, res, next) =>
 });
 
 
+export const getallrefundstats = catchAsyncError(async (req, res, next) => {
+  const paymentId = req.params.id;
+  console.log(paymentId, "paymentid");
+  
+  try {
+    const getallrefunddata = await instance.payments.fetchMultipleRefund(paymentId);
+    console.log(getallrefunddata);
+
+    res.status(200).json({
+      success: true,
+      getallrefunddata,
+    });
+  } catch (error) {
+    console.error('Error fetching refund data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch refund data',
+    });
+  }
+});
 
 
 

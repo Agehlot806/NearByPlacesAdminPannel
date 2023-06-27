@@ -87,7 +87,7 @@ res.status(200).json({
 }
 else {
   res.status(500).json({
-    message: "Booking Status not changed"
+    message: "Please do Payment first to confirmed your booking"
   })
 }
 })

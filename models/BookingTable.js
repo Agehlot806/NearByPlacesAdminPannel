@@ -55,6 +55,11 @@ const schema = new mongoose.Schema(
     required: true,
     default: "Available",
   },
+  cancellation_charges:{
+    type:Number,
+    default:0,
+  }
+  
   },
   { timestamps: true }
 );
