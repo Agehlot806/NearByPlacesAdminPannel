@@ -6,41 +6,46 @@ import { BookingTable } from "../models/BookingTable.js";
 import { User } from "../models/User.js";
 // import { v4 as uuidv4 } from "uuid";
 export const NewBooking = catchAsyncError(async(req,res,next)=>{
-    const {bookingDate,location,max_people, table_no,table_price,bookingTime,StoreId} = req.body;
-    const store = await Store.findById(req.body.StoreId);
-    console.log(store, 'store');
-    const filterData = await BookingTable.findOne({store_id: StoreId });
-    console.log(filterData, 'filterData');
-    if(filterData.tableStatus == "Available"){
-   const userobj = {
-    userId:req.user._id,
-    name:req.user.name,
-    email:req.user.email
-   }
-  //  const bookingId = uuidv4();
-  const bookingId = Math.floor(1000 + Math.random() * 9000);
-    const booking = await Booking.create({
-        bookingId,bookingTime,
-        table_price,
-        storename:store.name,
-        storenumber:store.phonenumber,
-        storeimage:store.storephoto,
-    })
-    booking.userData.push(userobj);
-    await booking.save();
-    res.status(201).json({
-        success:true,
-        message:"Booking created Successfully",
-        booking,
-    })
-  }
-  else {
-    res.status(201).json({
-      success:false,
-      message:"Table is already booked in this time slot"
+  const {bookingDate,location,max_people, table_no,table_price,bookingTime,StoreId, tableId} = req.body;
+  const store = await Store.findById(req.body.StoreId);
+  console.log(store, 'store');
+  const filterData = await BookingTable.findOne({store_id: StoreId });
+  console.log(filterData, 'filterData');
+  const tableData = await BookingTable.findOne({_id: tableId});
+  console.log(tableData, 'tableData');
+  if(tableData.tableStatus == "Available"){
+ const userobj = {
+  userId:req.user._id,
+  name:req.user.name,
+  email:req.user.email
+ }
+//  const bookingId = uuidv4();
+const bookingId = Math.floor(1000 + Math.random() * 9000);
+  const booking = await Booking.create({
+      bookingId,bookingTime,
+      table_price,
+      storename:store.name,
+      storenumber:store.phonenumber,
+      storeimage:store.storephoto,
   })
-  }
+  booking.userData.push(userobj);
+  await booking.save();
+  res.status(201).json({
+      success:true,
+      message:"Booking created Successfully",
+      booking,
+  })
+}
+else {
+  res.status(201).json({
+    success:false,
+    message:"Table is already booked in this time slot"
+})
+}
 });
+
+
+
 export const getSingleBooking = catchAsyncError(async(req,res,next)=>{
     const booking = await Booking.findById(req.params.id);
     if (!booking) {

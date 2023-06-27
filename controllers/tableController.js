@@ -2,6 +2,7 @@ import { Store } from "../models/Stores.js";
 import { BookingTable } from "../models/BookingTable.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
+import { Booking } from "../models/Booking.js";
 // import morgan from "morgan"// console.log(morgan);
 // console.log(ErrorHandler)
 export const createTable = async(req, res, next) => {
@@ -48,6 +49,14 @@ export const createTable = async(req, res, next) => {
       message: "You are not authenticated to create the table",
     });
   };
+}
+export const updatetableStatus = async(req,res,next) =>{
+  const bookingID = req.body;
+  const tableId = req.body;
+  const bookingFind = await Booking.findById(bookingID);
+  console.log(bookingFind, 'bookingFind');
+  const tableFind = await BookingTable.findById(tableId);
+  console.log(tableFind, 'tableFind');
 }
 export const updateTable = async (req, res, next) => {
   try {

@@ -93,6 +93,12 @@ type:String,
     required: true,
     default: "Pending",
   },
+  tableId:{
+    type:mongoose.Schema.Types.ObjectId,
+    // required:true,
+    ref:"BookingTable",
+
+  },
   createdAt: {
     type: Date,
     default: Date.now,
