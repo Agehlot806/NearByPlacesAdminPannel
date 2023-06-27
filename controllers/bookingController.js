@@ -3,7 +3,9 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Store } from "../models/Stores.js";
 import { BookingTable } from "../models/BookingTable.js";
+import {instance} from "../server.js"
 import { User } from "../models/User.js";
+import { PaymentModel } from "../models/PaymentModel.js";
 // import { v4 as uuidv4 } from "uuid";
 export const NewBooking = catchAsyncError(async(req,res,next)=>{
   const {bookingDate,location,max_people, table_no,table_price,bookingTime,StoreId, tableId} = req.body;
@@ -130,4 +132,49 @@ export const myBookings = catchAsyncError(async (req, res, next) => {
       message: "Booking status updated successfully",
       booking,
     });
+  });
+
+
+  export const BookingCancellation = catchAsyncError(async (req, res, next) => {
+    // console.log(req.user, 'req.user');
+    const { BookingId } = req.body;
+    const  razorpay_order_id  = req.params;
+      
+    console.log(BookingId, razorpay_order_id.id, "req.body");
+    try {
+      // Fetch the reservation from the database
+      const booking = await PaymentModel.findOne({ razorpay_order_id: razorpay_order_id.id });
+          console.log(booking, 'bookingData');
+      if (!booking) {
+        return next(new ErrorHandler('Booking not found', 404));
+      }
+  
+      // Retrieve the full reservation data based on the reservationId
+      const bookingData = await Booking.findOne({ _id: BookingId });
+         console.log(bookingData, "data");
+      if (!bookingData) {
+        return next(new ErrorHandler('Booking not found', 404));
+      }
+  
+      // Make a refund request to Razorpay
+      const refund = await instance.payments.refund(booking.razorpay_payment_id);
+  
+      // Update the reservation status in the database
+      bookingData.BookingStatus = 'cancelled';
+      await bookingData.save();
+  
+      // Update the user's account balance or any other necessary actions
+  
+      res.status(200).json({
+        success: true,
+        message: 'Booking cancelled and refund processed successfully',
+        refundAmount: refund.amount / 100, // Convert refund amount from paise to currency
+      });
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process refund',
+      });       
+    }
   });
