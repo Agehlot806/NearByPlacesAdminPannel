@@ -55,34 +55,6 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 
 
-
-
-
-
-
-
-  // export const SendNotification = catchAsyncError(async(req,res,next)=>{
-  //   try {
-  //     const tokens = await fetchTokensFromDatabase();
-  
-  //     const message = {
-  //       notification: {
-  //         title: 'New Notification',
-  //         body: 'This is a notification from your app!',
-  //       },
-  //       tokens: tokens,
-  //     };
-  
-  //     const response = await admin.messaging().sendMulticast(message);
-  
-  //     console.log('Notification sent:', response);
-  
-  //     res.sendStatus(200);
-  //   } catch (error) {
-  //     console.error('Error sending notifications:', error);
-  //     res.sendStatus(500);
-  //   }
-  // })
   export const SendNotification = catchAsyncError(async (req, res, next) => {
     try {
       const tokens = await fetchTokensFromDatabase();
