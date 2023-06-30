@@ -79,8 +79,6 @@ export const updatetableStatus = async(req,res,next) =>{
 }
 
 
-
-
 export const updateTable = async (req, res, next) => {
   try {
     const updatetable = await BookingTable.findByIdAndUpdate(
