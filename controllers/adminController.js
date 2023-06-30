@@ -8,6 +8,16 @@ import { categoryUpload, uploadsingle } from "../middlewares/multer.js";
 import deleteFromS3 from "../middlewares/multer.js";
 import admin from "firebase-admin";
 import { Merchant } from "../models/Merchant.js";
+import nodeCron from "node-cron";
+
+
+nodeCron.schedule("*/59 * * * *", function() {
+  SendNotification();
+  });
+
+
+  
+
 
 // import serviceAccount from '../book-my-place-tarun-firebase-adminsdk-hnvjf-04ae09427e.json' assert { type: 'json' };
 const serviceAccount ={
@@ -55,6 +65,7 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 
 
+
   export const SendNotification = catchAsyncError(async (req, res, next) => {
     try {
       const tokens = await fetchTokensFromDatabase();
@@ -72,22 +83,34 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       console.log('Notification sent:', response);
   
       const errors = [];
-      response.forEach((result, index) => {
-        if (!result.success) {
-          const error = result.error;
-          errors.push({ index, error });
-        }
-      });
+      if (Array.isArray(response)) {
+        response.forEach((result, index) => {
+          if (!result.success) {
+            const error = result.error;
+            errors.push({ index, error });
+          }
+        });
+      } else {
+        console.log('Unexpected response:', response);
+        // Handle the unexpected response accordingly
+      }
   
       console.log('Notification errors:', errors);
   
-      res.sendStatus(200);
+      // res.status(200).json({
+      //   success: true,
+      //   message: "Notification sent successfully",
+      // });
     } catch (error) {
       console.error('Error sending notifications:', error);
-      res.sendStatus(500);
+      return res.status(500).json({
+        success: false,
+        message: "Notification failed",
+      });
     }
   });
   
+
   
 
   async function fetchTokensFromDatabase() {
@@ -397,6 +420,8 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
   //   });
   // });
 
+  
+
   export const sendEmailtoAll = catchAsyncError(async (req, res, next) => {
     try {
       const { recipients, title, body } = req.body; // Assuming recipients, title, and body are sent in the request body
@@ -435,6 +460,43 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
     }
   });
   
+
+  const sendEmailtoAllusrswithcronjob = async () => {
+    try {
+      const recipients = 'all'; // Specify the desired recipients ('user', 'admin', or 'all')
+      const title = 'Notification Title';
+      const body = 'Notification Body';
+  
+      let roleQuery = {};
+  
+      if (recipients === 'user') {
+        roleQuery = { role: 'user' };
+      } else if (recipients === 'admin') {
+        roleQuery = { role: 'admin' };
+      } else if (recipients === 'all') {
+        roleQuery = { role: { $in: ['user', 'admin'] } };
+      } else {
+        throw new Error('Invalid recipient selection');
+      }
+  
+      // Retrieve users based on the role query
+      const users = await User.find(roleQuery, 'email');
+      console.log(users)
+  
+      const emailPromises = users.map(async (user) => {
+        await sendEmail(user.email, title, body);
+      });
+  
+      await Promise.all(emailPromises);
+  
+      console.log('Emails sent successfully');
+    } catch (error) {
+      console.error('Error sending emails:', error);
+    }
+  };
+  
+  // Schedule the cronjob to execute sendEmailtoAll function every minute
+  nodeCron.schedule('*/59 * * * *', sendEmailtoAllusrswithcronjob);
   
 
 
