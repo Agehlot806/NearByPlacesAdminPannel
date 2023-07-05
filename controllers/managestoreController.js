@@ -10,33 +10,9 @@ import { Subscription } from "../models/SubscriptionMerchant.js";
 import {instance} from "../server.js";
 import crypto from "crypto";
 import { SubscriptionModel } from "../models/subscriptionMerchantPayment.js";
-// import role from "./eventController.js"
-
-// export const AddnewStore = catchAsyncError(async (req, res, next) => {
-//     storeupload(req,res,async(err)=>{
-//       if (err)
-//       return res.status(400).json({ success: false, message: err.message });
-//       const {name,phonenumber,website,details,videourl,latitude,longitude,status,storeownername} = req.body;
-//       const photoUrl1Value = req.files['storephoto'][0].location;
-//       const photoUrl2Value = req.files['storegallery'][0].location;
-//       if (!name||!latitude||!longitude||!phonenumber)
-//       return next(new ErrorHandler("please add all fields",400));
-//       let store = await Store.findOne({name})
-//       if(store)
-//       return next(new ErrorHandler("store already registerd",409));
-//       const {categoryId} = req.params;
-//       const newstoreobject = {
-//         name,phonenumber,website,details,videourl,latitude,longitude,storegallery:photoUrl2Value,storephoto:photoUrl1Value,status,storeownername,category:categoryId};
-//         store = new Store(newstoreobject);
-//         await Category.findByIdAndUpdate(categoryId,{$push:{stores:store._id}},{new:true});
-//         await store.save();
-//         res.status(201).json({
-//           success: true,
-//           message: "Store added Successfully.",
-//           store,
-//         });
-//     })
-//   });
+// import nodeGeocoder from 'node-geocoder';
+import nodeGeocoder from 'node-geocoder';
+import QRCode from "qrcode";
 
 export const AddnewStore = catchAsyncError(async (req, res, next) => {
   var validate;
@@ -47,7 +23,6 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
   console.log(length1, 'length');
   // var validate;
   for (var i = 0; i < length1; i++) {
-
     var b = req.user.permission[i];
     var c = { createAny: "store" }
 
@@ -56,78 +31,149 @@ export const AddnewStore = catchAsyncError(async (req, res, next) => {
     console.log(JSON.stringify(b), 'bbbbbbbbb')
 
     if (JSON.stringify(c) === JSON.stringify(b))
-       validate = req.user.permission[i];
+      validate = req.user.permission[i];
 
     console.log(req.user.permission[i], 'iiii')
     console.log(validate, 'validate')
-
-
   }
+
   storeupload(req, res, async (err) => {
     if (err)
       return res.status(400).json({ success: false, message: err.message });
-      if ( validate != undefined || req.user.role == "admin") {
-        const { name, phonenumber, website, details, videourl, latitude, longitude, status, storeownername, subscriptionPlanId } = req.body;
-        const photoUrl1Value = req.files['storephoto'][0].location;
-        const photoUrl2Value = req.files['storegallery'][0].location;
-        if (!name || !latitude || !longitude || !phonenumber)
-          return next(new ErrorHandler("Please add all fields", 400));
-        let store = await Store.findOne({ name })
-        if (store)
-          return next(new ErrorHandler("Store already registered", 409));
-        const { categoryId } = req.params;
-        const newStoreObject = {
-          name, phonenumber, website, details, videourl, latitude, longitude, storegallery: photoUrl2Value, storephoto: photoUrl1Value, status, storeownername, category: categoryId, subscriptionPlan: subscriptionPlanId
+
+    if (validate != undefined || req.user.role == "admin") {
+      const { name, phonenumber, website, details, videourl, latitude, longitude, status, storeownername, subscriptionPlanId,availableMenu} = req.body;
+      const photoUrl1Value = req.files['storephoto'][0].location;
+      const photoUrl2Value = req.files['storegallery'][0].location;
+
+      if (!name || !latitude || !longitude || !phonenumber)
+        return next(new ErrorHandler("Please add all fields", 400));
+
+      let store = await Store.findOne({ name })
+      if (store)
+        return next(new ErrorHandler("Store already registered", 409));
+
+      const { categoryId } = req.params;
+
+      let options = {
+        provider: 'openstreetmap'
+      };
+
+      let geoCoder = nodeGeocoder(options);
+
+      let livelocation = [];
+
+      try {
+        const response = await geoCoder.reverse({ lat: latitude, lon: longitude });
+        const geocoderResult = response[0];
+
+        livelocation.push({
+          type: 'Point',
+          coordinates: [longitude, latitude],
+          formattedAddress: geocoderResult.formattedAddress,
+          country: geocoderResult.country,
+          city: geocoderResult.city,
+          state: geocoderResult.state,
+          zipcode: geocoderResult.zipcode,
+          streetName: geocoderResult.streetName,
+          neighbourhood: geocoderResult.neighbourhood,
+          provider: geocoderResult.provider
+        });
+
+        // console.log(livelocation);
+        // const livelocation3 = {
+        //   type: "Point",
+        //   coordinates :  [longitude,latitude]
+        // }
+        // console.log(livelocation3, '3333333');
+        let livelocation2 = {
+          type: 'Point',
+          coordinates: [longitude, latitude]
         };
+
+      
+
+        // Converting the data into String format
+let stringdata = JSON.stringify(availableMenu)
+// Print the QR code to terminal
+QRCode.toString(stringdata,{type:'terminal'},
+                    function (err, QRcode) {
+    if(err) return console.log("error occurred")
+    // Printing the generated code
+    console.log(QRcode)
+})
+let MenuQR = "";
+// Converting the data into base64
+MenuQR = await QRCode.toDataURL(stringdata);
+
+console.log(MenuQR,"qrcode ahi ye")
+
+     const newStoreObject = {
+          name, phonenumber, website, details, videourl, livelocation2,livelocation, storegallery: photoUrl2Value, storephoto: photoUrl1Value, status, storeownername, category: categoryId, subscriptionPlan: subscriptionPlanId,availableMenu,MenuQR
+        };
+
         store = new Store(newStoreObject);
+
+        // Push the livelocation to the store schema
+        store.livelocation = livelocation;
+
         await Category.findByIdAndUpdate(categoryId, { $push: { stores: store._id } }, { new: true });
-    
-        // Get the subscription plan details from your system based on the subscriptionPlanId
+
         const subscriptionPlan = await Subscription.findById(subscriptionPlanId);
         const expirationDate = new Date();
         console.log(expirationDate)
-        let ress =expirationDate.setDate(expirationDate.getDate() + subscriptionPlan.validityDays);
-        console.log("fafafafaff",ress);
-        const subscriptionobj ={
-          subscriptionplanId:subscriptionPlan._id,
-          subscriptionPrice:subscriptionPlan.subprice,
-          subscriptionDetails:subscriptionPlan.Details,
-          subscriptionImage:subscriptionPlan.subimage,
-          subscriptionName:subscriptionPlan.subname,
-          validityDays:expirationDate.toISOString(),
-        }
-    
+        let ress = expirationDate.setDate(expirationDate.getDate() + subscriptionPlan.validityDays);
+        console.log("fafafafaff", ress);
+        const subscriptionobj = {
+          subscriptionplanId: subscriptionPlan._id,
+          subscriptionPrice: subscriptionPlan.subprice,
+          subscriptionDetails: subscriptionPlan.Details,
+          subscriptionImage: subscriptionPlan.subimage,
+          subscriptionName: subscriptionPlan.subname,
+          validityDays: expirationDate.toISOString(),
+        };
+
         if (!subscriptionPlan) {
           return next(new ErrorHandler("Invalid subscription plan", 400));
         }
-    
-       
+
         store.subscriptionPlanData.push(subscriptionobj);
+
         const currentDate = new Date();
         const timeDifference = expirationDate.getTime() - currentDate.getTime();
         console.log(timeDifference)
+
         if (timeDifference > 0) {
           setTimeout(async () => {
             await Store.findByIdAndUpdate(store._id, { $unset: { subscriptionPlanData: 1 } });
           }, timeDifference);
         }
-    
+
         await store.save();
+
         res.status(201).json({
           success: true,
           message: "Store added successfully",
           store,
         });
-      }
-      else {
-        res.status(400).json({
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({
           success: false,
-          message: "you are not authenticated"
-        })
+          message: "Error retrieving live location data",
+        });
       }
-   
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "You are not authenticated",
+      });
+    }
+
   });
 });
+
+
 
 
 export const checkousubscription = catchAsyncError(async (req, res, next)  => {
@@ -360,37 +406,258 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
   //     }
   //   })
   // });
+  // export const UpdateStore = catchAsyncError(async (req, res, next) => {
+  //   const storeId = req.params.id;
+  // console.log(req.user, 'user');
+  // var validate;
+  // var length1 = req.user.permission.length;
+  // console.log(length1, 'length');
+  // // var validate;
+  // for (var i = 0; i < length1; i++) {
+
+  //   var b = req.user.permission[i];
+  //   var c = { deleteAny: "event" }
+
+  //   console.log(JSON.stringify(c), 'cccccc')
+
+  //   console.log(JSON.stringify(b), 'bbbbbbbbb')
+
+  //   if (JSON.stringify(c) === JSON.stringify(b))
+  // {   validate = req.user.permission[i];
+
+  //   console.log(req.user.permission[i], 'iiii')
+  //   console.log(validate, 'validate')
+  // }
+
+
+
+  // }
+  //   storeupload(req, res, async (err) => {
+  //     if (err) {
+  //       return next(new ErrorHandler("Failed to update image"));
+  //     }
+  //     if ( validate != undefined || req.user.role == "admin") {
+  //       const {
+  //         name,
+  //         category,
+  //         phonenumber,
+  //         website,
+  //         details,
+  //         videourl,
+  //         latitude,
+  //         longitude,
+  //         status,
+  //         storeownername,
+  //         availableMenu
+  //       } = req.body;
+  //       console.log(name);
+  //       const updates = {};
+  //       if (name) updates.name = name;
+  //       if (category) updates.category = category;
+  //       if (phonenumber) updates.phonenumber = phonenumber;
+  //       if (website) updates.website = website;
+  //       if (details) updates.details = details;
+  //       if (videourl) updates.videourl = videourl;
+  //       if (latitude) updates.latitude = latitude;
+  //       if (longitude) updates.longitude = longitude;
+  //       if (status) updates.status = status;
+  //       if (storeownername) updates.storeownername = storeownername;
+  //       if (availableMenu) {
+  //         if(availableMenu.items) updates.availableMenu.items = items;
+  //         if(availableMenu.price) updates.availableMenu.price = price;
+  //         let stringdata = JSON.stringify(availableMenu)
+  //         let MenuQR = "";
+  //         // Converting the data into base64
+  //         MenuQR = await QRCode.toDataURL(stringdata);
+  //         updates.MenuQR = MenuQR;
+  //         updates.availableMenu = availableMenu;
+  //       } 
+
+  //       if (req.files['storephoto']) {
+  //         const photoUrl1Value = req.files['storephoto'][0].location;
+  //         updates.storephoto = photoUrl1Value;
+  //       }
+    
+  //       if (req.files['storegallery']) {
+  //         const photoUrl2Value = req.files['storegallery'][0].location;
+  //         updates.storegallery = photoUrl2Value;
+  //       }
+       
+  //         const store = await Store.findById(storeId);
+  //         if (!store) {
+  //           return next(new ErrorHandler("Store not found"));
+  //         }
+  //         if (updates.storephoto && store.storephoto) {
+  //           await deleteFromS3(store.storephoto);
+  //         }
+  //         if (updates.storegallery && store.storegallery) {
+  //           await deleteFromS3(store.storegallery);
+  //         }
+    
+  //         Object.assign(store, updates);
+  //         await store.save();
+  //         res.status(200).json({
+  //           success: true,
+  //           message: "Store updated successfully",
+  //           store
+  //         });
+  //     }
+  //     else {
+  //       res.status(400).json({
+  //         success: false,
+  //         message: "you are not authenticated"
+  //       })
+  //     }
+   
+  
+  //   });
+  // });
+  
+  // export const UpdateStore = catchAsyncError(async (req, res, next) => {
+  //   const storeId = req.params.id;
+  //   console.log(req.user, 'user');
+
+  //   var validate;
+  //   var length1 = req.user.permission.length;
+  //   console.log(length1, 'length');
+  
+  //   for (var i = 0; i < length1; i++) {
+  //     var b = req.user.permission[i];
+  //     var c = { deleteAny: "event" }
+  
+  //     console.log(JSON.stringify(c), 'cccccc')
+  //     console.log(JSON.stringify(b), 'bbbbbbbbb')
+  
+  //     if (JSON.stringify(c) === JSON.stringify(b)) {
+  //       validate = req.user.permission[i];
+  //       console.log(req.user.permission[i], 'iiii')
+  //       console.log(validate, 'validate')
+  //     }
+  //   }
+  
+  //   storeupload(req, res, async (err) => {
+  //     if (err) {
+  //       return next(new ErrorHandler("Failed to update image"));
+  //     }
+  
+  //     if (validate !== undefined || req.user.role === "admin") {
+  //       const {
+  //         name,
+  //         category,
+  //         phonenumber,
+  //         website,
+  //         details,
+  //         videourl,
+  //         latitude,
+  //         longitude,
+  //         status,
+  //         storeownername,
+  //         availableMenu
+  //       } = req.body;
+  // console.log(req.body, 'req.body');
+  //       const updates = {};
+  //       if (name) updates.name = name;
+  //       if (category) updates.category = category;
+  //       if (phonenumber) updates.phonenumber = phonenumber;
+  //       if (website) updates.website = website;
+  //       if (details) updates.details = details;
+  //       if (videourl) updates.videourl = videourl;
+  //       if (latitude) updates.latitude = latitude;
+  //       if (longitude) updates.longitude = longitude;
+  //       if (status) updates.status = status;
+  //       if (storeownername) updates.storeownername = storeownername;
+  
+  //       if (availableMenu) {
+  //         const { items, price } = availableMenu;
+  //         const existingStore = await Store.findById(storeId);
+  
+  //         if (existingStore && existingStore.availableMenu) {
+  //           // for(var i = 0; i < existingStore.availableMenu.length; i++){
+  //           //     console.log(existingStore.availableMenu[i]);
+  //           // }
+  //           // if(existingStore.availableMenu[i])
+  //           if (items) {
+  //             existingStore.availableMenu.items = items;
+  //             updates['availableMenu.items'] = items;
+  //           }
+  //           if (price) {
+  //             existingStore.availableMenu.price = price;
+  //             updates['availableMenu.price'] = price;
+  //           }
+  
+  //           let stringData = JSON.stringify(existingStore.availableMenu);
+  //           let menuQR = await QRCode.toDataURL(stringData);
+  //           updates.MenuQR = menuQR;
+  //         }
+  //       }
+  
+  //       if (req.files['storephoto']) {
+  //         const photoUrl1Value = req.files['storephoto'][0].location;
+  //         updates.storephoto = photoUrl1Value;
+  //       }
+  
+  //       if (req.files['storegallery']) {
+  //         const photoUrl2Value = req.files['storegallery'][0].location;
+  //         updates.storegallery = photoUrl2Value;
+  //       }
+  
+  //       const store = await Store.findById(storeId);
+  //       if (!store) {
+  //         return next(new ErrorHandler("Store not found"));
+  //       }
+  
+  //       if (updates.storephoto && store.storephoto) {
+  //         await deleteFromS3(store.storephoto);
+  //       }
+  
+  //       if (updates.storegallery && store.storegallery) {
+  //         await deleteFromS3(store.storegallery);
+  //       }
+  
+  //       Object.assign(store, updates);
+  //       await store.save();
+  
+  //       res.status(200).json({
+  //         success: true,
+  //         message: "Store updated successfully",
+  //         store
+  //       });
+  //     } else {
+  //       res.status(400).json({
+  //         success: false,
+  //         message: "You are not authenticated"
+  //       });
+  //     }
+  //   });
+  // });
   export const UpdateStore = catchAsyncError(async (req, res, next) => {
     const storeId = req.params.id;
-  console.log(req.user, 'user');
-  var validate;
-  var length1 = req.user.permission.length;
-  console.log(length1, 'length');
-  // var validate;
-  for (var i = 0; i < length1; i++) {
-
-    var b = req.user.permission[i];
-    var c = { deleteAny: "event" }
-
-    console.log(JSON.stringify(c), 'cccccc')
-
-    console.log(JSON.stringify(b), 'bbbbbbbbb')
-
-    if (JSON.stringify(c) === JSON.stringify(b))
-  {   validate = req.user.permission[i];
-
-    console.log(req.user.permission[i], 'iiii')
-    console.log(validate, 'validate')
-  }
-
-
-
-  }
+    console.log(req.user, 'user');
+  
+    var validate;
+    var length1 = req.user.permission.length;
+    console.log(length1, 'length');
+  
+    for (var i = 0; i < length1; i++) {
+      var b = req.user.permission[i];
+      var c = { deleteAny: "event" }
+  
+      console.log(JSON.stringify(c), 'cccccc')
+      console.log(JSON.stringify(b), 'bbbbbbbbb')
+  
+      if (JSON.stringify(c) === JSON.stringify(b)) {
+        validate = req.user.permission[i];
+        console.log(req.user.permission[i], 'iiii')
+        console.log(validate, 'validate')
+      }
+    }
+  
     storeupload(req, res, async (err) => {
       if (err) {
         return next(new ErrorHandler("Failed to update image"));
       }
-      if ( validate != undefined || req.user.role == "admin") {
+  
+      if (validate !== undefined || req.user.role === "admin") {
         const {
           name,
           category,
@@ -401,9 +668,11 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
           latitude,
           longitude,
           status,
-          storeownername
+          storeownername,
+          availableMenu
         } = req.body;
-        console.log(name);
+        console.log(req.body, 'req.body');
+  
         const updates = {};
         if (name) updates.name = name;
         if (category) updates.category = category;
@@ -415,45 +684,74 @@ export const DeleteStore = catchAsyncError(async (req, res, next) => {
         if (longitude) updates.longitude = longitude;
         if (status) updates.status = status;
         if (storeownername) updates.storeownername = storeownername;
+  
+        if (availableMenu) {
+          const { items, price } = availableMenu;
+          const existingStore = await Store.findById(storeId);
+  
+          if (existingStore && existingStore.availableMenu) {
+            // Find the index of the object you want to update
+            const index = existingStore.availableMenu.findIndex(obj => obj._id === availableMenu._id);
+            console.log(index, 'index');
+            if (index !== -1) {
+              // Create a new object with the updated properties
+              const updatedObject = {};
+              if (items) updatedObject.items = items;
+              if (price) updatedObject.price = price;
+  
+              // Replace the object at the specific index
+              existingStore.availableMenu[index] = { ...existingStore.availableMenu[index], ...updatedObject };
+         console.log(availableMenu,'menu');
+              updates.availableMenu = existingStore.availableMenu;
+           console.log(updates.availableMenu, 'menu1')
+              // Generate the new QR code
+              let stringData = JSON.stringify(existingStore.availableMenu);
+              let menuQR = await QRCode.toDataURL(stringData);
+              updates.MenuQR = menuQR;
+            }
+          }
+        }
+  
         if (req.files['storephoto']) {
           const photoUrl1Value = req.files['storephoto'][0].location;
           updates.storephoto = photoUrl1Value;
         }
-    
+  
         if (req.files['storegallery']) {
           const photoUrl2Value = req.files['storegallery'][0].location;
           updates.storegallery = photoUrl2Value;
         }
-       
-          const store = await Store.findById(storeId);
-          if (!store) {
-            return next(new ErrorHandler("Store not found"));
-          }
-          if (updates.storephoto && store.storephoto) {
-            await deleteFromS3(store.storephoto);
-          }
-          if (updates.storegallery && store.storegallery) {
-            await deleteFromS3(store.storegallery);
-          }
-    
-          Object.assign(store, updates);
-          await store.save();
-          res.status(200).json({
-            success: true,
-            message: "Store updated successfully",
-            store
-          });
-      }
-      else {
+  
+        const store = await Store.findById(storeId);
+        if (!store) {
+          return next(new ErrorHandler("Store not found"));
+        }
+  
+        if (updates.storephoto && store.storephoto) {
+          await deleteFromS3(store.storephoto);
+        }
+  
+        if (updates.storegallery && store.storegallery) {
+          await deleteFromS3(store.storegallery);
+        }
+  
+        Object.assign(store, updates);
+        await store.save();
+  
+        res.status(200).json({
+          success: true,
+          message: "Store updated successfully",
+          store
+        });
+      } else {
         res.status(400).json({
           success: false,
-          message: "you are not authenticated"
-        })
+          message: "You are not authenticated"
+        });
       }
-   
-  
     });
   });
+  
   
   
 //user store reviews 
@@ -682,4 +980,94 @@ export const deleteSubscription= catchAsyncError(async(req,res,next)=>{
     success:true,
     message:"Subscription deleted successfully"
   })
+})
+
+
+//mobile user apisss started here 
+
+
+export const getNearByResturenttoUser = catchAsyncError(async (req, res, next) => {
+  const { latitude, longitude } = req.body;
+
+  let options = {
+    provider: 'openstreetmap'
+  };
+
+  let geoCoder = nodeGeocoder(options);
+  const response = await geoCoder.reverse({ lat: latitude, lon: longitude });
+  const geocoderResult = response[0];
+  console.log(geocoderResult);
+
+  const cityFind = await Store.find({});
+
+  let avalableResutrentInCity = [];
+
+  for (var i = 0; i < cityFind.length; i++) {
+    console.log(cityFind[i].livelocation[0].city, 'city');
+    if (cityFind[i].livelocation[0].city === geocoderResult.city) {
+      avalableResutrentInCity.push(cityFind[i]);
+    } else {
+      console.log("false");
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Getting cities",
+    avalableResutrentInCity,
+  });
+}
+);
+
+
+export const getResByDistance = catchAsyncError(async (req, res, next) => {
+  const { latitude, longitude, distance } = req.body;
+  console.log(req.body, "req.body");
+
+  const storeFind = await Store.find({
+    livelocation2: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        },
+        $maxDistance: distance,
+      },
+    },
+  });
+if(storeFind.length===0) return next(new ErrorHandler("No resturent findNearby"))
+
+res.status(200).json({
+  success:true,
+  message:"NearBYResturent",
+  storeFind,
+})
+});
+
+
+export const getNearByResturenttoUserByRating = catchAsyncError(async(req,res,next)=>{
+
+  const { latitude, longitude, distance ,rating} = req.body;
+  console.log(req.body, "req.body");
+
+  const storeFind = await Store.find({
+    ratings: {$gte:rating},
+    livelocation2: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        },
+        $maxDistance: distance,
+      },
+    },
+  });
+if(storeFind.length===0) return next(new ErrorHandler("No resturent findNearby"))
+
+res.status(200).json({
+  success:true,
+  message:"NearBYResturent",
+  storeFind,
+})
+
 })
