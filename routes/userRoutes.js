@@ -1,5 +1,5 @@
 import express from "express";
-import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll} from "../controllers/adminController.js";
+import {registerUser,login,logout,getMyProfile, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 import passport from "../utils/strategy.js";
 import { getGraphData } from "../controllers/dashboardController.js";
@@ -21,6 +21,13 @@ router.route("/sendnotification").post(SendNotification);
 router.route("/merchant/register").post(merchantRegister);
 router.route("/sendemail").post(sendEmailtoAll);
 router.route("/getgraphdata").get(getGraphData);
+router.route("/getfavresturent").post(isAuthenticated,getUserfavoriateResturent);
+router.route("/removeresturentfav").post(isAuthenticated,removeUserFavoriteRestaurant);
+router.route("/getfavrescount").get(isAuthenticated,countUserLikedRestaurants);
+
+
+
+
 
 
 

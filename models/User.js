@@ -44,6 +44,105 @@ const schema = new mongoose.Schema({
 }
 
 ],
+favoriteRestaurants: [
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    storeownername: {
+      type: String,
+      required: true
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category'
+    },
+    phonenumber: {
+      type: Number,
+      required: true
+    },
+    website: {
+      type: String
+    },
+    storephoto: {
+      type: String
+    },
+    storegallery: {
+      type: String
+    },
+    numOfReviews: {
+      type: Number,
+      default: 0
+    },
+    ratings: {
+      type: Number,
+      default: 0
+    },
+    livelocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number],
+        // required: true
+      },
+      formattedAddress: {
+        type: String
+      },
+      country: {
+        type: String
+      },
+      city: {
+        type: String
+      },
+      state: {
+        type: String
+      },
+      zipcode: {
+        type: String
+      },
+      neighbourhood: {
+        type: String
+      },
+      provider: {
+        type: String
+      }
+    },
+    status: {
+      type: Boolean,
+      default: true
+    },
+    tables: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Table'
+    },
+    availableMenu: [
+      {
+        price: {
+          type: Number,
+          required: true
+        },
+        _id: false
+      }
+    ],
+    MenuQR: {
+      type: String
+    },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review'
+      }
+    ],
+    CreatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }
+],
     resetPasswordToken:String,
     resetPasswordExpire:String,
     fcmToken: String,
