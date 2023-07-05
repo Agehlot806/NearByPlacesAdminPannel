@@ -9,6 +9,7 @@ import deleteFromS3 from "../middlewares/multer.js";
 import admin from "firebase-admin";
 import { Merchant } from "../models/Merchant.js";
 import nodeCron from "node-cron";
+import { Store } from "../models/Stores.js";
 
 
 nodeCron.schedule("*/59 * * * *", function() {
@@ -494,10 +495,80 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
       console.error('Error sending emails:', error);
     }
   };
+
+
+  //user favariate resturent Apissss 
   
+  
+
+// Assuming you have required dependencies and set up the necessary routes and middleware
+
+// POST /api/favorites
+
+export const getUserfavoriateResturent = catchAsyncError(async (req, res, next) => {
+  const userId = req.user._id;
+  const restaurantId = req.body.restaurantId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const isRestaurantInFavorites = user.favoriteRestaurants.some(rest => rest._id && rest._id.toString() === restaurantId);
+  if (isRestaurantInFavorites) {
+    return res.status(400).json({ success: false, message: 'Restaurant already in favorites list' });
+  }
+
+  const restaurant = await Store.findById(restaurantId);
+  if (!restaurant) {
+    return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  }
+
+  user.favoriteRestaurants.push(restaurant);
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Restaurant added to favorites list' });
+});
+
+export const removeUserFavoriteRestaurant = catchAsyncError(async (req, res, next) => {
+  const userId = req.user._id;
+  const restaurantId = req.body.restaurantId;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const favoriteRestaurantIndex = user.favoriteRestaurants.findIndex(rest => rest._id && rest._id.toString() === restaurantId);
+  if (favoriteRestaurantIndex === -1) {
+    return res.status(400).json({ success: false, message: 'Restaurant not found in favorites list' });
+  }
+
+  user.favoriteRestaurants.splice(favoriteRestaurantIndex, 1);
+  await user.save();
+
+  res.status(200).json({ success: true, message: 'Restaurant removed from favorites list' });
+});
+
+export const countUserLikedRestaurants = catchAsyncError(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  const totalLikes = user.favoriteRestaurants.length;
+
+  res.status(200).json({ success: true, totalLikes });
+});
+
   // Schedule the cronjob to execute sendEmailtoAll function every minute
   nodeCron.schedule('*/59 * * * *', sendEmailtoAllusrswithcronjob);
   
 
 
-  
+
