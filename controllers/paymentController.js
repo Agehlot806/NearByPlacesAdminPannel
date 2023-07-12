@@ -5,7 +5,7 @@ import crypto from "crypto"
 import { Booking } from "../models/Booking.js";
 import { PaymentModel } from "../models/PaymentModel.js";
 import { BookingModelDataModel } from "../models/BookingModelDataModel.js";
-import { BookingTable } from "../models/BookingTable.js";
+// import { BookingTable } from "../models/BookingTable.js";
 export const checkout = catchAsyncError(async (req, res, next)  => {
   const bookingId = req.params.id;
   const booking = await Booking.findById(bookingId);

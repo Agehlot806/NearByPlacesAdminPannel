@@ -1,24 +1,7 @@
 import mongoose from "mongoose";
 const schema = new mongoose.Schema(
   {
-    // bookingUser:[
-    //   {
-    //     user:{
-    //       type:mongoose.Schema.Types.ObjectId,
-    //       ref:"User",
-    //       required:true,
-    //     },
-    //     name:{
-    //       type:String,
-    //     },
-    //     email:{
-    //       type:String,
-    //     },
-    //     phonenumber:{
-    //       type:String,
-    //     }
-    //   }
-    // ],
+
     title: {
       type: String,
       required: true,
@@ -35,7 +18,6 @@ const schema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // tableNumbers: [{ number: Number, unavailableDates: {type: [Date]}}],
     table_no: {
       type: Number,
       required: true,
@@ -43,24 +25,19 @@ const schema = new mongoose.Schema(
      location:
     {
     type:  [String],
-    required: true
+    // required: true
   },
-  store_id:
-  {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  tableStatus: {
-    type: String,
-    required: true,
-    default: "Available",
-  },
+
   cancellation_charges:{
     type:Number,
     default:0,
-  }
+  },
+  tableStatus:{
+    type:String,
+    default:"Available"
+  },
   
   },
   { timestamps: true }
 );
-export const BookingTable = mongoose.model("BookingTable", schema);
+export const Tables = mongoose.model("Tables", schema);

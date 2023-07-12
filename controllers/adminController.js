@@ -507,8 +507,7 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
 
 export const getUserfavoriateResturent = catchAsyncError(async (req, res, next) => {
   const userId = req.user._id;
-  const restaurantId = req.body.restaurantId;
-
+  const restaurantId = req.body.restaurantId;       
   const user = await User.findById(userId);
 
   if (!user) {
@@ -552,7 +551,8 @@ export const removeUserFavoriteRestaurant = catchAsyncError(async (req, res, nex
   res.status(200).json({ success: true, message: 'Restaurant removed from favorites list' });
 });
 
-export const countUserLikedRestaurants = catchAsyncError(async (req, res, next) => {
+export const 
+countUserLikedRestaurants = catchAsyncError(async (req, res, next) => {
   const userId = req.user._id;
 
   const user = await User.findById(userId);

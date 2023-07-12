@@ -2,132 +2,291 @@ import { Booking } from "../models/Booking.js";
 import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Store } from "../models/Stores.js";
-import { BookingTable } from "../models/BookingTable.js";
-import { User } from "../models/User.js";
-// import { v4 as uuidv4 } from "uuid";
-export const NewBooking = catchAsyncError(async(req,res,next)=>{
-  const {bookingDate,location,max_people, table_no,table_price,bookingTime,StoreId, tableId} = req.body;
-  const store = await Store.findById(req.body.StoreId);
-  console.log(store, 'store');
-  const filterData = await BookingTable.findOne({store_id: StoreId });
-  console.log(filterData, 'filterData');
-  const tableData = await BookingTable.findOne({_id: tableId});
-  console.log(tableData, 'tableData');
-  if(tableData.tableStatus == "Available"){
- const userobj = {
-  userId:req.user._id,
-  name:req.user.name,
-  email:req.user.email
- }
-//  const bookingId = uuidv4();
-const bookingId = Math.floor(1000 + Math.random() * 9000);
-  const booking = await Booking.create({
-      bookingId,bookingTime,
-      table_price,
-      storename:store.name,
-      storenumber:store.phonenumber,
-      storeimage:store.storephoto,
-  })
-  booking.userData.push(userobj);
-  await booking.save();
-  res.status(201).json({
-      success:true,
-      message:"Booking created Successfully",
-      booking,
-  })
-}
-else {
-  res.status(201).json({
-    success:false,
-    message:"Table is already booked in this time slot"
-})
-}
-});
+import mongoose from "mongoose";
+//Create a booking api for userBooking
+// export const NewBookingUser = async (req, res, next) => {
+//   const storeId = req.params.storeId;
+//   const tableId = req.params.tableId;
+//   const { name, email, phoneNumber, date, time, people } = req.body;
 
+//   try {
+//     const storeData = await Store.findById(storeId);
 
+//     if (!storeData) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Store not found",
+//       });
+//     }
 
-export const getSingleBooking = catchAsyncError(async(req,res,next)=>{
-    const booking = await Booking.findById(req.params.id);
-    if (!booking) {
-        return next(new ErrorHandler("Booking not found with this Id", 404));
-      }
-      res.status(200).json({
-        success: true,
-        booking,
+//     const table = storeData.tables.find((table) => table._id.toString() === tableId);
+
+//     if (!table) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Table not found",
+//       });
+//     }
+
+//     // Check if the table is already booked for the selected date, time, and number of people
+//     const isTableBooked = table.bookings && table.bookings.some(
+//       (booking) => booking.date === date && booking.time === time && booking.people === people
+//     );
+
+//     if (isTableBooked) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Table is already booked for the selected date, time, and number of people",
+//       });
+//     }
+
+//     const bookingId = generateBookingId(); // Generate a unique 6-digit booking ID
+
+//     const bookingEndTime = new Date(date);
+//     bookingEndTime.setHours(parseInt(time.split(':')[0]) + 2);
+//     bookingEndTime.setMinutes(parseInt(time.split(':')[1]));
+
+//     const bookingDetails = new Booking({
+//       bookingId,
+//       user: req.user._id,
+//       name,
+//       email,
+//       phoneNumber,
+//       tableNumber: table.table_no,
+//       date,
+//       time,
+//       people,
+//       storeName: storeData.name,
+//       storeId: storeData._id,
+//       livelocation: storeData.livelocation,
+//       bookingEndTime,
+//     });
+
+//     // table.bookings.push(bookingDetails);
+
+//     // Update the tableStatus of the table to 'unavailable'
+//     table.tableStatus = 'unavailable';
+
+//     await storeData.save();
+
+//     // Schedule a task to update the tableStatus back to 'available' after the booking end time
+//     const currentTime = new Date();
+//     const timeDifference = bookingEndTime - currentTime;
+//     setTimeout(() => {
+//       table.tableStatus = 'available';
+//       storeData.save();
+//     }, timeDifference);
+
+//     await bookingDetails.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Table booked successfully",
+//       booking: bookingDetails,
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+export const NewBookingUser = async (req, res, next) => {
+  const storeId = req.params.storeId;
+  const tableId = req.params.tableId;
+  const { name, email, phoneNumber, date, time, people } = req.body;
+
+  try {
+    const storeData = await Store.findById(storeId);
+
+    if (!storeData) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found",
       });
-})
-//logged In user Order
-export const myBookings = catchAsyncError(async (req, res, next) => {
-    const bookings = await Booking.find({ user: req.user._id });
-    res.status(200).json({
-      success: true,
-      bookings,
-    });
-  });
-  // get all Orders -- Admin
-  export const getAllBookings = catchAsyncError(async (req, res, next) => {
-    const bookings = await Booking.find();
-    let totalAmount = 0;
-    let confirmed = 0;
-    let pending = 0;
-    bookings.forEach((booking) => {
-        totalAmount += booking.totalPrice;
-       if(booking.BookingStatus == "true")
-       {
-           confirmed = confirmed + 1;
-       }
-       else{
-        pending = pending + 1;
-       }
-    });
-    res.status(200).json({
-      success: true,
-      totalAmount,
-      bookings,
-      confirmed,
-      pending
-    });
-  });
-  export const DeleteBooking = catchAsyncError(async (req, res, next) => {
-    const bookingId = req.params.id;
-    const userId = req.user._id;
-    const booking = await Booking.findOne({
-      _id: bookingId,
-      'userData.userId': userId,
-    });
-    if (!booking) {
-      return next(new ErrorHandler('Booking not found', 404));
     }
-    // Remove the booking from the userData array
-    booking.userData = booking.userData.filter(
-      (user) => user.userId.toString() !== userId.toString()
+
+    const table = storeData.tables.find((table) => table._id.toString() === tableId);
+
+    if (!table) {
+      return res.status(404).json({
+        success: false,
+        message: "Table not found",
+      });
+    }
+
+    // Check if the table is already booked for the selected date, time, and number of people
+    const isTableBooked = table.bookings && table.bookings.some(
+      (booking) => booking.date === date && booking.time === time && booking.people === people
     );
-    // If no user is left in the booking, delete the entire booking document
-    if (booking.userData.length === 0) {
-      await Booking.deleteOne({ _id: bookingId });
-      return res.status(200).json({
-        success: true,
-        message: 'Booking deleted successfully',
+
+    if (isTableBooked) {
+      return res.status(400).json({
+        success: false,
+        message: "Table is already booked for the selected date, time, and number of people",
       });
     }
-    // Save the updated booking with the user removed
-    await booking.save();
-    res.status(200).json({
-      success: true,
-      message: 'Booking deleted successfully',
+
+    const bookingId = generateBookingId(); // Generate a unique 6-digit booking ID
+
+    const bookingEndTime = new Date();
+    bookingEndTime.setMinutes(bookingEndTime.getMinutes() + 2);
+
+    const bookingDetails = new Booking({
+      bookingId,
+      user: req.user._id,
+      name,
+      email,
+      phoneNumber,
+      tableNumber: table.table_no,
+      date,
+      time,
+      people,
+      storeName: storeData.name,
+      storeId: storeData._id,
+      livelocation: storeData.livelocation,
+      bookingEndTime,
     });
-  });
-  export const updateBookingStatus = catchAsyncError(async (req, res, next) => {
-    const { bookingId, BookingStatus } = req.body;
-    const booking = await Booking.findById(bookingId);
-    if (!booking) {
-      return next(new ErrorHandler("Booking not found", 404));
-    }
-    booking.BookingStatus = BookingStatus;
-    await booking.save();
+
+    // Update the tableStatus of the table to 'unavailable'
+    table.tableStatus = 'unavailable';
+
+    await storeData.save();
+
+    // Schedule a task to update the tableStatus back to 'available' after the booking end time
+    const currentTime = new Date();
+    const timeDifference = bookingEndTime - currentTime;
+    setTimeout(() => {
+      table.tableStatus = 'available';
+      storeData.save();
+    }, timeDifference);
+
+    await bookingDetails.save();
+
     res.status(200).json({
       success: true,
-      message: "Booking status updated successfully",
+      message: "Table booked successfully",
+      booking: bookingDetails,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
+
+// Function to generate a unique 6-digit booking ID
+function generateBookingId() {
+  const min = 100000; // Minimum 6-digit number
+  const max = 999999; // Maximum 6-digit number
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+
+//get all booking of particular store
+export const getAllBookings = async (req, res, next) => {
+  const storeId = req.params.storeId;
+
+  try {
+    const storeData = await Store.findById(storeId);
+
+    if (!storeData) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found",
+      });
+    }
+
+    const bookings = await Booking.find({ storeId: storeData._id });
+
+    res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+//logged In user Order
+export const getUserBookings = async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    const bookings = await Booking.find({ user: userId });
+
+    res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+//get single booking 
+export const getBooking = async (req, res, next) => {
+  const storeId = req.params.storeId;
+  const bookingId = req.params.bookingId;
+
+  try {
+    const storeData = await Store.findById(storeId);
+
+    if (!storeData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Store not found',
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid bookingId',
+      });
+    }
+
+    const booking = await Booking.findOne({ storeId: storeData._id, _id: bookingId });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Booking not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
       booking,
     });
-  });
+  } catch (err) {
+    next(err);
+  }
+};
+
+//getAllStores Booking 
+export const getAllBookingsAllStore = async (req, res, next) => {
+  try {
+    const bookings = await Booking.find();
+
+    res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+//DeleteBooking
+export const deletebooking  = catchAsyncError(async(req,res,next)=>{
+  const bookingId = req.params.bookingId;
+  let booking = await Booking.findById(bookingId);
+  if(!booking){
+    return next(new ErrorHandler("Booking not found",400))
+  }
+  await booking.deleteOne();
+  res.status(200).json({
+    success:true,
+    message:"Booking deleted successfully"
+  })
+})
+ 

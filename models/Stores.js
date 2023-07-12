@@ -279,29 +279,38 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  tables: {
-    type: [String]
-  },
-  tablebookinguser: [
+ 
+  tables: [
     {
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+      title: {
+        type: String,
         required: true,
       },
-      name: {
+      price: {
+        type: Number,
+        required: true,
+      },
+      maxPeople: {
+        type: Number,
+        required: true,
+      },
+      desc: {
         type: String,
       },
-      email: {
+      table_no: {
         type: String,
       },
-      phonenumber: {
-        type: String,
+      location: {
+        type: [String],
       },
-      tablenumber: {
-        type: String,
+      cancellation_charges: {
+        type: Number,
+      },
+      tableStatus:{
+        type:String,
+        default:"Available"
       }
-    }
+    },
   ],
   subscriptionPlanData: [
     {

@@ -1,12 +1,14 @@
 import express from "express";
-import { createTable, updateTable ,deleteTable, updatetableAvailability, gettable, gettables, updatetableStatus} from "../controllers/tableController.js";
+import { createTable, updateTable ,deleteTable,getAllTables, updatetableStatus, getTable, getAllTablesofAllStore} from "../controllers/tableController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 const router = express.Router();
 router.route("/createtable/:storeId").post(isAuthenticated,createTable);
 router.route("/updatetablestatus/:id").put(updatetableStatus);
-router.route("/updatetable/:id").put(updateTable);
-router.route("/tables/:id/:storeId").delete(deleteTable);
-router.route("/tables/availability/:id").put(updatetableAvailability);
-router.route("/tables/:id").get(gettable);
-router.route("/alltables").get(gettables);
+router.route("/updatetable/:storeId/tables/:tableId").put(isAuthenticated,updateTable);
+router.route("/table/:storeId/tables/:tableId").delete(isAuthenticated,deleteTable);
+router.route("/table/:storeId").get(getAllTables);
+router.route("/table/:storeId/table/:tableId").get(isAuthenticated,getTable);
+router.route("/alltables").get(isAuthenticated,getAllTablesofAllStore);
+
+
 export default router;
