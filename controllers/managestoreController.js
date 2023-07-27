@@ -1,5 +1,5 @@
-import { Store } from "../models/Stores.js";
-import { catchAsyncError } from "../middlewares/catchAsyncError.js";
+import { Store } from "../models/Stores.js"
+import { catchAsyncError } from "../middlewares/catchAsyncError.js"
 import ErrorHandler from "../utils/ErrorHandler.js";
 import ApiFeatures from "../utils/apifeatures.js";
 import { Category } from "../models/Application.js";
