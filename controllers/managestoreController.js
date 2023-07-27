@@ -244,51 +244,100 @@ if (isAuthentic) {
 
 
 
-  export const GetAllStores  = catchAsyncError(async (req, res, next) => {
-    console.log(req.user, 'user');
+  // export const GetAllStores  = catchAsyncError(async (req, res, next) => {
+  //   console.log(req.user, 'user');
+  //   var validate;
+  //   var length1 = req.user.permission.length;
+  //   console.log(length1, 'length');
+  //   // var validate;
+  //   for (var i = 0; i < length1; i++) {
+  
+  //     var b = req.user.permission[i];
+  //     var c = { readAny: "store" }
+  
+  //     console.log(JSON.stringify(c), 'cccccc')
+  
+  //     console.log(JSON.stringify(b), 'bbbbbbbbb')
+  
+  //     if (JSON.stringify(c) === JSON.stringify(b))
+  //   {   validate = req.user.permission[i];
+  
+  //     console.log(req.user.permission[i], 'iiii')
+  //     console.log(validate, 'validate')
+  //   }
+  
+  
+  //   }
+  //   if ( validate != undefined || req.user.role == "admin") {
+  //     const resultPerPage =5;
+  //     const storeCount = await Store.countDocuments();
+  //     const apiFeature = new ApiFeatures(Store.find().populate("category","categoryname"),req.query).search().filter().pagination(resultPerPage);
+  //     let stores = await apiFeature.query;
+  //     res.status(200).json({
+  //       success: true,
+  //       stores,
+  //       storeCount,
+  //       resultPerPage
+  //     });
+  //   }
+  //   else{
+  //     res.status(400).json({
+  //       success:false,
+  //       message:"you do not have access reachOut admin for more"
+  //     })
+  //   }
+    
+  // });
+
+export const GetAllStores = catchAsyncError(async (req, res, next) => {
+    // Check if req.user is not set, i.e., user is not logged in
+    if (!req.user) {
+      // Handle the case when the user is not logged in
+      const resultPerPage = 5;
+      const storeCount = await Store.countDocuments();
+      const apiFeature = new ApiFeatures(
+        Store.find().populate("category", "categoryname"),
+        req.query
+      ).search().filter().pagination(resultPerPage);
+      let stores = await apiFeature.query;
+  
+      return res.status(200).json({
+        success: true,
+        stores,
+        storeCount,
+        resultPerPage,
+      });
+    }
+  
+    // If the user is logged in, proceed with permission check
     var validate;
     var length1 = req.user.permission.length;
-    console.log(length1, 'length');
-    // var validate;
-    for (var i = 0; i < length1; i++) {
   
-      var b = req.user.permission[i];
-      var c = { readAny: "store" }
+    // ... (rest of the existing code) ...
   
-      console.log(JSON.stringify(c), 'cccccc')
-  
-      console.log(JSON.stringify(b), 'bbbbbbbbb')
-  
-      if (JSON.stringify(c) === JSON.stringify(b))
-    {   validate = req.user.permission[i];
-  
-      console.log(req.user.permission[i], 'iiii')
-      console.log(validate, 'validate')
-    }
-  
-  
-    }
-    if ( validate != undefined || req.user.role == "admin") {
-      const resultPerPage =5;
+    if (validate != undefined || req.user.role == "admin") {
+      const resultPerPage = 5;
       const storeCount = await Store.countDocuments();
-      const apiFeature = new ApiFeatures(Store.find().populate("category","categoryname"),req.query).search().filter().pagination(resultPerPage);
+      const apiFeature = new ApiFeatures(
+        Store.find().populate("category", "categoryname"),
+        req.query
+      ).search().filter().pagination(resultPerPage);
       let stores = await apiFeature.query;
       res.status(200).json({
         success: true,
         stores,
         storeCount,
-        resultPerPage
+        resultPerPage,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "you do not have access reachOut admin for more",
       });
     }
-    else{
-      res.status(400).json({
-        success:false,
-        message:"you do not have access reachOut admin for more"
-      })
-    }
-    
   });
- 
+  
+
 
   export const GetAllStoresRecentAdded = catchAsyncError(async (req, res, next) => {
     const store = await Store.find().populate("category","categoryname")
