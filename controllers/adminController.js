@@ -207,11 +207,22 @@ export const verify = catchAsyncError(async (req, res, next) => {
 export const registerUser = catchAsyncError(async (req, res, next) => {
   uploadsingle(req, res, async (err) => {
     if (err)
-      return next(new ErrorHandler("Failed to upload image, please try again later"));
+      return next(
+        new ErrorHandler("Failed to upload image, please try again later")
+      );
 
-    const { name, email, phone, address, latitude, longitude, otpId } = req.body;
+    const { name, email, phone, address, latitude, longitude, otpId } =
+      req.body;
 
-    if (!name || !phone || !email || !address || !latitude || !longitude || !otpId)
+    if (
+      !name ||
+      !phone ||
+      !email ||
+      !address ||
+      !latitude ||
+      !longitude ||
+      !otpId
+    )
       return next(new ErrorHandler("Please enter all required fields", 400));
 
     try {
@@ -225,6 +236,27 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       let user = await User.findOne({ email });
       if (user) {
         return next(new ErrorHandler("User with this email already exists", 409));
+      }
+
+      // Check if the name is already used
+      user = await User.findOne({ otpId });
+      if (user) {
+        return next(new ErrorHandler("User with this otpId already exists", 409));
+      }
+      user = await User.findOne({ phone });
+      if (user) {
+        return next(new ErrorHandler("User with this phone already exists", 409));
+      }
+
+      // Check if the combination of name, email, and otpId exists
+      user = await User.findOne({ phone, email, otpId });
+      if (user) {
+        return next(
+          new ErrorHandler(
+            "User with the same name, email, and otpId already exists",
+            409
+          )
+        );
       }
 
       const adminavatarvalue = req.file.location;
