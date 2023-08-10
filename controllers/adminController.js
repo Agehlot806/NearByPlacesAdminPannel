@@ -157,7 +157,7 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
     } else {
       // User does not exist in the OTP model
       // Generate and save a dummy OTP (replace this with actual OTP generation and sending logic)
-      const dummyOTP = "123456"; // Replace with actual OTP generation
+      const dummyOTP = "1234"; // Replace with actual OTP generation
       otpUser = new Otp({ phone, otp: dummyOTP });
       await otpUser.save();
 
