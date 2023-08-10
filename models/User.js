@@ -12,14 +12,41 @@ const schema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter your email"],
     unique: true,
-    validate: validator.isEmail,
+    // validate: validator.isEmail,
   },
 
   password: {
     type: String,
-    required: [true, "Please enter your password"],
+    // required: [true, "Please enter your password"],
     minLength: [6, "Password must be at least 6 characters"],
-    select: false,
+    // select: false,
+  },
+  phone: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  address: {
+    type: String,
+  },
+  state: {
+    type: String,
+  },
+  city: {
+    type: String,
+  },
+  latitude: {
+    type: Number,
+  },
+  longitude: {
+    type: Number,
+  },
+  otpId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "otp", 
+  },
+  otp: {
+    type: Number,
   },
   role: {
     type: String,
@@ -28,6 +55,7 @@ const schema = new mongoose.Schema({
   },
     adminavatar:{
       type:String
+      
     },
     testapidata:{
       type:String
@@ -48,7 +76,7 @@ favoriteRestaurants: [
   {
     name: {
       type: String,
-      required: true
+      // required: true
     },
     storeownername: {
       type: String,
