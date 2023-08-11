@@ -204,6 +204,49 @@ export const verify = catchAsyncError(async (req, res, next) => {
   }
 });
 
+
+export const login = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    return next(new ErrorHandler("Please enter all field", 400));
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) return next(new ErrorHandler("Incorrect Email or Password", 401));
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch)
+    return next(new ErrorHandler("Incorrect Email or Password", 401));
+  sendToken(res, user, `Welcome back, ${user.email}`, 200);
+});
+
+export const registerAdmin = catchAsyncError(async (req, res, next) => {
+  uploadsingle(req, res, async (err) => {
+    if (err)
+      return next(new ErrorHandler("failed to upload image try again later"))
+      const{name,email,password,} = req.body;
+      const fcmToken = req.body.fcmToken;
+      if(!name||!email||!password||!fcmToken)
+      return next(new ErrorHandler("Please enter all field", 400));
+      let user = await User.findOne({ email });
+      if (user) return next(new ErrorHandler("Admin Already Exist", 409));
+      const adminavatarvalue = req.file.location;
+ user = await User.create({
+     name,
+      email,
+      password,
+      adminavatar: adminavatarvalue,
+      fcmToken
+      
+    })
+  
+    await user.save();
+
+      sendToken(res, user, `${user.role} added Successfully`, 201);
+  });
+});
+
+
 export const registerUser = catchAsyncError(async (req, res, next) => {
   uploadsingle(req, res, async (err) => {
     if (err)
