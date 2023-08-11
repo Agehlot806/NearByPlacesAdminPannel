@@ -11,6 +11,9 @@ import { Merchant } from "../models/Merchant.js";
 import nodeCron from "node-cron";
 import { Store } from "../models/Stores.js";
 import { Otp } from "../models/otp.js";
+import {Offer} from "../models/Offer.js"
+import ApiFeatures from "../utils/apifeatures.js";
+
 nodeCron.schedule("*/59 * * * *", function () {
   SendNotification();
 });
@@ -483,6 +486,13 @@ export const getallusers = catchAsyncError(async (req, res, next) => {
     users,
   });
 });
+export const getsingleusers = catchAsyncError(async (req, res, next) => {
+  const users = await User.find();
+  res.status(200).json({
+    success: true,
+    users,
+  });
+});
 
 export const getDashboardStats = catchAsyncError(async (req, res, next) => {
   const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(12);
@@ -717,6 +727,28 @@ export const removeUserFavoriteRestaurant = catchAsyncError(
   }
 );
 
+export const Banner = catchAsyncError(async (req, res, next) => {
+  try {
+    const resultPerPage = 5;
+    const offerCount = await Offer.countDocuments();
+    const apiFeature = new ApiFeatures(Offer.find(), req.query).search().filter().pagination(resultPerPage);
+    const offers = await apiFeature.query;
+    
+    res.status(200).json({
+      success: true,
+      offers,
+      offerCount,
+      resultPerPage
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching offers."
+    });
+  }
+});
+
+
 export const countUserLikedRestaurants = catchAsyncError(
   async (req, res, next) => {
     const userId = req.user._id;
@@ -734,6 +766,5 @@ export const countUserLikedRestaurants = catchAsyncError(
     res.status(200).json({ success: true, totalLikes });
   }
 );
-
 // Schedule the cronjob to execute sendEmailtoAll function every minute
 nodeCron.schedule("*/59 * * * *", sendEmailtoAllusrswithcronjob);
