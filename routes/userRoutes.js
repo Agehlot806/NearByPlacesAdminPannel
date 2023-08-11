@@ -1,5 +1,5 @@
 import express from "express";
-import {PhoneOtp,verify,getMyProfile,logout,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
+import {PhoneOtp,login,verify,getMyProfile,logout,registerAdmin,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 import passport from "../utils/strategy.js";
 import { getGraphData } from "../controllers/dashboardController.js";
@@ -8,6 +8,8 @@ const router = express.Router();
 // router.route("/registeradmin").post(registerUser);
 router.route("/PhoneOtp").post(PhoneOtp);
 router.route("/verify").post(verify);
+router.route("/login").post(login);
+router.route("/registeradmin").post(registerAdmin);
 router.route("/registerUser").post(registerUser);
 router.route("/logout").get(logout);
 router.route("/myprofile").get(isAuthenticated,getMyProfile);
