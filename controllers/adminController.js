@@ -148,6 +148,7 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
         return res.json({
           message: "User already registered, otp generated successfully!",
           isNewUser: false,
+          userId: otpUser._id,
         });
       } else {
         // Phone found in the OTP model but corresponding User not found
