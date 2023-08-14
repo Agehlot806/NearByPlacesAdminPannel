@@ -178,8 +178,7 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
 });
 
 export const verify = catchAsyncError(async (req, res, next) => {
-  
-  const { otp,id } = req.body;
+  const { otp, id } = req.body;
 
   try {
     // Find the OTP model with the provided ID
@@ -200,8 +199,15 @@ export const verify = catchAsyncError(async (req, res, next) => {
     // otpModel.otp = undefined;
     await otpModel.save();
 
-    // Return the response indicating successful OTP verification
-    return res.json({ message: "OTP verified successfully" });
+    // Fetch the user details based on otpId
+    const user = await User.findOne({ otpId: id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return the user details along with the response indicating successful OTP verification
+    return res.json({ message: "OTP verified successfully", user });
   } catch (error) {
     console.error("Error while verifying OTP:", error);
     return res.status(500).json({ error: "Something went wrong" });
