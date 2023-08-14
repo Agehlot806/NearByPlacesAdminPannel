@@ -328,6 +328,28 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+export const getUserDetailsByOtpId = catchAsyncError(async (req, res, next) => {
+  const otpId = req.params.otpId; // Get the otpId from the URL parameter
+
+  try {
+    // Find the user by their otpId field
+    const user = await User.findOne({ otpId });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Error while fetching user details:", error);
+    return next(new ErrorHandler("Something went wrong", 500));
+  }
+});
+
+
 export const logout = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
