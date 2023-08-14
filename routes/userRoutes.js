@@ -1,5 +1,5 @@
 import express from "express";
-import {PhoneOtp,login,verify,getMyProfile,Banner,logout,registerAdmin,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
+import {PhoneOtp,login,verify,getUserDetailsByOtpId,getMyProfile,Banner,logout,registerAdmin,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 import passport from "../utils/strategy.js";
 import { getGraphData } from "../controllers/dashboardController.js";
@@ -20,6 +20,7 @@ router.route("/forgetpassword").post(forgetPassword);
 router.route("/testapi").post(testapi);
 // ResetPassword
 router.route("/resetpassword/:token").put(resetPassword);
+router.get("/users/:otpId", getUserDetailsByOtpId);
 router.route("/updateuserrole/:id").put(isAuthenticated,authorizeAdmin,updateUserRole);
 router.route("/getallusers").get(getallusers);
 router.route("/sendnotification").post(SendNotification);
