@@ -88,6 +88,89 @@ import mongoose from "mongoose";
 //     next(err);
 //   }
 // };
+
+export const NewBookingByUser = async (req, res, next) => {
+  const storeId = req.params.storeId;
+  const tableId = req.params.tableId;
+  const { name, email, phoneNumber, date, time, people } = req.body;
+
+  try {
+    const storeData = await Store.findById(storeId);
+
+    if (!storeData) {
+      return res.status(404).json({
+        success: false,
+        message: "Store not found",
+      });
+    }
+
+    const table = storeData.tables.find((table) => table._id.toString() === tableId);
+
+    if (!table) {
+      return res.status(404).json({
+        success: false,
+        message: "Table not found",
+      });
+    }
+
+    // Check if the table is already booked for the selected date, time, and number of people
+    const isTableBooked = table.bookings && table.bookings.some(
+      (booking) => booking.date === date && booking.time === time && booking.people === people
+    );
+
+    if (isTableBooked) {
+      return res.status(400).json({
+        success: false,
+        message: "Table is already booked for the selected date, time, and number of people",
+      });
+    }
+
+    const bookingId = generateBookingId(); // Generate a unique 6-digit booking ID
+
+    const bookingEndTime = new Date();
+    bookingEndTime.setMinutes(bookingEndTime.getMinutes() + 2);
+
+    const bookingDetails = new Booking({
+      bookingId,
+      name,
+      email,
+      phoneNumber,
+      tableNumber: table.table_no,
+      date,
+      time,
+      people,
+      storeName: storeData.name,
+      storeId: storeData._id,
+      livelocation: storeData.livelocation,
+      bookingEndTime,
+    });
+
+    // Update the tableStatus of the table to 'unavailable'
+    table.tableStatus = 'unavailable';
+
+    await storeData.save();
+
+    // Schedule a task to update the tableStatus back to 'available' after the booking end time
+    const currentTime = new Date();
+    const timeDifference = bookingEndTime - currentTime;
+    setTimeout(() => {
+      table.tableStatus = 'available';
+      storeData.save();
+    }, timeDifference);
+
+    await bookingDetails.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Table booked successfully",
+      booking: bookingDetails,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 export const NewBookingUser = async (req, res, next) => {
   const storeId = req.params.storeId;
   const tableId = req.params.tableId;
