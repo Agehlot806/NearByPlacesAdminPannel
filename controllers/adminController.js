@@ -132,7 +132,90 @@ export const merchantRegister = catchAsyncError(async (req, res, next) => {
 //   sendToken(res, user, `Welcome back, ${user.email}`, 200);
 // });
 
-export const PhoneOtp = catchAsyncError(async (req, res, next) => {
+export const PhoneOtp_Login = catchAsyncError(async (req, res, next) => {
+  const { phone } = req.body;
+
+  try {
+    // Check if the user with the given phone number exists in the OTP model
+    let otpUser = await Otp.findOne({ phone });
+
+    if (otpUser) {
+      // Find the corresponding user in the User model using otpId
+      let user = await User.findOne({ otpId: otpUser._id });
+
+      if (user) {
+        // Both phone and otpId found in both models
+        return res.json({
+          message: "User already registered, otp generated successfully!",
+          isNewUser: false,
+          userId: otpUser._id,
+        });
+      } else {
+        // Phone found in the OTP model but corresponding User not found
+        return res.json({
+          message: "OTP sent for login, User not fully registered yet.",
+          isNewUser: true,
+          userId: otpUser._id,
+        });
+      }
+    } else {
+      // User does not exist in the OTP model
+      // Generate and save a dummy OTP (replace this with actual OTP generation and sending logic)
+      const dummyOTP = "1234"; // Replace with actual OTP generation
+      otpUser = new Otp({ phone, otp: dummyOTP });
+      await otpUser.save();
+
+      return res.json({
+        message: "User registered successfully, otp generated successfully!",
+        isNewUser: true,
+        userId: otpUser._id,
+      });
+    }
+  } catch (error) {
+    console.error("Error while registering/logging in user:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+export const verify_Login = catchAsyncError(async (req, res, next) => {
+  const { otp, id } = req.body;
+
+  try {
+    // Find the OTP model with the provided ID
+    const otpModel = await Otp.findById(id);
+
+    if (!otpModel) {
+      // OTP model with the provided ID not found
+      return res.status(404).json({ error: "OTP model not found" });
+    }
+
+    // Compare the OTP from the model with the input OTP
+    if (otpModel.otp !== otp) {
+      // OTP does not match
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // Clear the OTP and save the OTP model
+    // otpModel.otp = undefined;
+    await otpModel.save();
+
+    // Fetch the user details based on otpId
+    const user = await User.findOne({ otpId: id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Return the user details along with the response indicating successful OTP verification
+    return res.json({ message: "OTP verified successfully", user });
+  } catch (error) {
+    console.error("Error while verifying OTP:", error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+
+export const PhoneOtp_Register = catchAsyncError(async (req, res, next) => {
   const { phone } = req.body;
 
   try {
@@ -177,7 +260,7 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
   }
 });
 
-export const verify = catchAsyncError(async (req, res, next) => {
+export const verify_Register = catchAsyncError(async (req, res, next) => {
   const { otp, id } = req.body;
 
   try {
