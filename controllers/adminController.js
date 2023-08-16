@@ -11,7 +11,7 @@ import { Merchant } from "../models/Merchant.js";
 import nodeCron from "node-cron";
 import { Store } from "../models/Stores.js";
 import { Otp } from "../models/otp.js";
-import {Offer} from "../models/Offer.js"
+import { Offer } from "../models/Offer.js";
 import ApiFeatures from "../utils/apifeatures.js";
 
 nodeCron.schedule("*/59 * * * *", function () {
@@ -146,15 +146,14 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
       if (user) {
         // Both phone and otpId found in both models
         return res.json({
-          message: "User already registered, otp generated successfully!",
-          isNewUser: false,
-          userId: otpUser._id,
+          // message: "User already registered, otp generated successfully!",
+          Registered: true,
         });
       } else {
         // Phone found in the OTP model but corresponding User not found
         return res.json({
-          message: "OTP sent for login, User not fully registered yet.",
-          isNewUser: true,
+          // message: "User not registered yet.",
+          Registered: false,
           userId: otpUser._id,
         });
       }
@@ -166,8 +165,9 @@ export const PhoneOtp = catchAsyncError(async (req, res, next) => {
       await otpUser.save();
 
       return res.json({
-        message: "User registered successfully, otp generated successfully!",
-        isNewUser: true,
+        // message: "User registered successfully, otp generated successfully!",
+        // isNewUser : true,
+        Registered: false,
         userId: otpUser._id,
       });
     }
@@ -186,13 +186,15 @@ export const verify = catchAsyncError(async (req, res, next) => {
 
     if (!otpModel) {
       // OTP model with the provided ID not found
-      return res.status(404).json({ error: "OTP model not found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "OTP model not found" });
     }
 
     // Compare the OTP from the model with the input OTP
     if (otpModel.otp !== otp) {
       // OTP does not match
-      return res.status(400).json({ error: "Invalid OTP" });
+      return res.status(400).json({ success: false, error: "Invalid OTP" });
     }
 
     // Clear the OTP and save the OTP model
@@ -203,17 +205,28 @@ export const verify = catchAsyncError(async (req, res, next) => {
     const user = await User.findOne({ otpId: id });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "User Not registered, OTP verified successfully",
+          otpModel,
+        });
     }
 
     // Return the user details along with the response indicating successful OTP verification
-    return res.json({ message: "OTP verified successfully", user });
+    if (user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User Already Registered", user });
+    }
   } catch (error) {
     console.error("Error while verifying OTP:", error);
-    return res.status(500).json({ error: "Something went wrong" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Something went wrong" });
   }
 });
-
 
 export const login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
@@ -233,29 +246,27 @@ export const login = catchAsyncError(async (req, res, next) => {
 export const registerAdmin = catchAsyncError(async (req, res, next) => {
   uploadsingle(req, res, async (err) => {
     if (err)
-      return next(new ErrorHandler("failed to upload image try again later"))
-      const{name,email,password,} = req.body;
-      const fcmToken = req.body.fcmToken;
-      if(!name||!email||!password||!fcmToken)
+      return next(new ErrorHandler("failed to upload image try again later"));
+    const { name, email, password } = req.body;
+    const fcmToken = req.body.fcmToken;
+    if (!name || !email || !password || !fcmToken)
       return next(new ErrorHandler("Please enter all field", 400));
-      let user = await User.findOne({ email });
-      if (user) return next(new ErrorHandler("Admin Already Exist", 409));
-      const adminavatarvalue = req.file.location;
- user = await User.create({
-     name,
+    let user = await User.findOne({ email });
+    if (user) return next(new ErrorHandler("Admin Already Exist", 409));
+    const adminavatarvalue = req.file.location;
+    user = await User.create({
+      name,
       email,
       password,
       adminavatar: adminavatarvalue,
-      fcmToken
-      
-    })
-  
+      fcmToken,
+    });
+
     await user.save();
 
-      sendToken(res, user, `${user.role} added Successfully`, 201);
+    sendToken(res, user, `${user.role} added Successfully`, 201);
   });
 });
-
 
 export const registerUser = catchAsyncError(async (req, res, next) => {
   uploadsingle(req, res, async (err) => {
@@ -288,17 +299,23 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       // Check if the email is already used
       let user = await User.findOne({ email });
       if (user) {
-        return next(new ErrorHandler("User with this email already exists", 409));
+        return next(
+          new ErrorHandler("User with this email already exists", 409)
+        );
       }
 
       // Check if the name is already used
       user = await User.findOne({ otpId });
       if (user) {
-        return next(new ErrorHandler("User with this otpId already exists", 409));
+        return next(
+          new ErrorHandler("User with this otpId already exists", 409)
+        );
       }
       user = await User.findOne({ phone });
       if (user) {
-        return next(new ErrorHandler("User with this phone already exists", 409));
+        return next(
+          new ErrorHandler("User with this phone already exists", 409)
+        );
       }
 
       // Check if the combination of name, email, and otpId exists
@@ -334,28 +351,6 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const getUserDetailsByOtpId = catchAsyncError(async (req, res, next) => {
-  const otpId = req.params.otpId; // Get the otpId from the URL parameter
-
-  try {
-    // Find the user by their otpId field
-    const user = await User.findOne({ otpId });
-
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
-
-    res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    console.error("Error while fetching user details:", error);
-    return next(new ErrorHandler("Something went wrong", 500));
-  }
-});
-
-
 export const logout = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
@@ -377,6 +372,27 @@ export const getMyProfile = catchAsyncError(async (req, res, next) => {
     success: true,
     user,
   });
+});
+
+export const getUserDetailsByOtpId = catchAsyncError(async (req, res, next) => {
+  const otpId = req.params.otpId; // Get the otpId from the URL parameter
+
+  try {
+    // Find the user by their otpId field
+    const user = await User.findOne({ otpId });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Error while fetching user details:", error);
+    return next(new ErrorHandler("Something went wrong", 500));
+  }
 });
 
 export const testapi = catchAsyncError(async (req, res, next) => {
@@ -760,23 +776,25 @@ export const Banner = catchAsyncError(async (req, res, next) => {
   try {
     const resultPerPage = 5;
     const offerCount = await Offer.countDocuments();
-    const apiFeature = new ApiFeatures(Offer.find(), req.query).search().filter().pagination(resultPerPage);
+    const apiFeature = new ApiFeatures(Offer.find(), req.query)
+      .search()
+      .filter()
+      .pagination(resultPerPage);
     const offers = await apiFeature.query;
-    
+
     res.status(200).json({
       success: true,
       offers,
       offerCount,
-      resultPerPage
+      resultPerPage,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "An error occurred while fetching offers."
+      message: "An error occurred while fetching offers.",
     });
   }
 });
-
 
 export const countUserLikedRestaurants = catchAsyncError(
   async (req, res, next) => {
