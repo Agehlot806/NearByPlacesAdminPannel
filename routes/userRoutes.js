@@ -12,6 +12,7 @@ router.route("/registerUser/:otpId").post(registerUser);
 router.route("/PhoneOtp_Register").post(PhoneOtp_Register);
 router.route("/verify_Register").post(verify_Register);
 router.get("/users/:otpId", getUserDetailsByOtpId);
+router.route("/editUserProfile/:userId").put(editUserProfile);
 router.route("/login").post(login);
 router.route("/banner").get(Banner);
 router.route("/registeradmin").post(registerAdmin);
