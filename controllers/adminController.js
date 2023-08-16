@@ -358,7 +358,8 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
         new ErrorHandler("Failed to upload image, please try again later")
       );
 
-    const { name, email, phone, address, latitude, longitude, otpId } =
+    const otpId = req.params.otpId; 
+    const { name, email, phone, address, latitude, longitude } =
       req.body;
 
     if (
@@ -367,8 +368,7 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
       !email ||
       !address ||
       !latitude ||
-      !longitude ||
-      !otpId
+      !longitude
     )
       return next(new ErrorHandler("Please enter all required fields", 400));
 
@@ -433,7 +433,6 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
     }
   });
 });
-
 export const logout = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
