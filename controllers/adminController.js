@@ -433,6 +433,49 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
     }
   });
 });
+
+export const editUserProfile = catchAsyncError(async (req, res, next) => {
+  try {
+    const { name, email, address, latitude, longitude } = req.body;
+    if (req.file) {
+      user.adminavatar = req.file.filename;
+    }
+      const { userId } = req.params;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    // Update the editable fields if they're provided in the request body
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
+    if (address !== undefined) user.address = address;
+    if (latitude !== undefined) user.latitude = latitude;
+    if (longitude !== undefined) user.longitude = longitude;
+
+    // Save the updated user document
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User profile updated successfully",
+      user: {
+        name: user.name,
+        email: user.email,
+        address: user.address,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        adminavatar: user.adminavatar,
+      },
+    });
+  } catch (error) {
+    console.error("Error while editing user profile:", error);
+    return next(new ErrorHandler("Something went wrong", 500));
+  }
+});
 export const logout = catchAsyncError(async (req, res, next) => {
   res
     .status(200)
