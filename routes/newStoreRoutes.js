@@ -1,5 +1,5 @@
 import express from "express";
-import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, createStoreReviews, getStoreReview,deleteReview, getStoreBYId, GetAllStoresRecentAdded, getAllStoreReviews, subscriptionPlanForMerchant, getallSubscription, updateSubscription, getallSubscriptionById, deleteSubscription,paymentVerificationofSubscription,checkousubscription, getNearByResturenttoUser, getResByDistance, getNearByResturenttoUserByRating} from "../controllers/managestoreController.js";
+import { AddnewStore, DeleteStore, GetAllStores, UpdateStore, createStoreReviews, getStoreReview,deleteReview, getStoreBYId, GetAllStoresRecentAdded, getAllStoreReviews, subscriptionPlanForMerchant, getallSubscription, updateSubscription, getallSubscriptionById, deleteSubscription,paymentVerificationofSubscription,checkousubscription, getNearByResturenttoUser, getResByDistance, getNearByResturenttoUserByRating,searchStore} from "../controllers/managestoreController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 const router = express.Router();
 router.route("/addnewstore/:categoryId/stores").post(isAuthenticated,AddnewStore);
@@ -20,6 +20,7 @@ router.route("/subscription/:id").delete(deleteSubscription)
 router.route("/getnearstore").post(getNearByResturenttoUser);
 router.route('/getResByDist').post(getResByDistance);
 router.route('/getResbByDisandRating').post(getNearByResturenttoUserByRating);
+router.route("/searchStore").get(searchStore);
 
 
 
