@@ -4,7 +4,7 @@ const BookingSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    // required: true,
+    required: true,
   },
   bookingId:{
     type:Number,
@@ -16,19 +16,22 @@ const BookingSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
+    // required: true,
   },
   email: {
     type: String,
-    required: true,
+    // required: true,
   },
   phoneNumber: {
     type: String,
-    required: true,
+    // required: true,
   },
   tableNumber: {
     type: String,
-    required: true,
+    // required: true,
+  },
+   month :{
+   type : String
   },
   date: {
     type: Date,
@@ -44,7 +47,7 @@ const BookingSchema = new mongoose.Schema({
   },
   storeName: {
     type: String,
-    required: true,
+    // required: true,
   },
   storeId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -55,11 +58,11 @@ const BookingSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: true
+      // required: true
     },
     coordinates: {
       type: [Number],
-      required: true
+      // required: true
     },
     formattedAddress: {
       type: String
