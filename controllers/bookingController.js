@@ -89,10 +89,12 @@ import mongoose from "mongoose";
 //   }
 // };
 
+
 export const NewBookingByUser = async (req, res, next) => {
   const storeId = req.params.storeId;
   const tableId = req.params.tableId;
-  const { name, email, phoneNumber, date, time, people } = req.body;
+  const userId = req.params.userId;
+  const { date, time, people } = req.body; 
 
   try {
     const storeData = await Store.findById(storeId);
@@ -113,7 +115,6 @@ export const NewBookingByUser = async (req, res, next) => {
       });
     }
 
-    // Check if the table is already booked for the selected date, time, and number of people
     const isTableBooked = table.bookings && table.bookings.some(
       (booking) => booking.date === date && booking.time === time && booking.people === people
     );
@@ -125,32 +126,26 @@ export const NewBookingByUser = async (req, res, next) => {
       });
     }
 
-    const bookingId = generateBookingId(); // Generate a unique 6-digit booking ID
-
+    const bookingId = generateBookingId();
     const bookingEndTime = new Date();
     bookingEndTime.setMinutes(bookingEndTime.getMinutes() + 2);
 
     const bookingDetails = new Booking({
       bookingId,
-      name,
-      email,
-      phoneNumber,
-      tableNumber: table.table_no,
+      user : userId, 
       date,
       time,
       people,
+      tableNumber: table.table_no,
       storeName: storeData.name,
       storeId: storeData._id,
       livelocation: storeData.livelocation,
       bookingEndTime,
     });
 
-    // Update the tableStatus of the table to 'unavailable'
     table.tableStatus = 'unavailable';
-
     await storeData.save();
 
-    // Schedule a task to update the tableStatus back to 'available' after the booking end time
     const currentTime = new Date();
     const timeDifference = bookingEndTime - currentTime;
     setTimeout(() => {
@@ -169,8 +164,6 @@ export const NewBookingByUser = async (req, res, next) => {
     next(err);
   }
 };
-
-
 export const NewBookingUser = async (req, res, next) => {
   const storeId = req.params.storeId;
   const tableId = req.params.tableId;
