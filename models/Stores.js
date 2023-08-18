@@ -220,6 +220,7 @@ const schema = new mongoose.Schema({
       }
     },
   ],
+
   livelocation2: {
     type: {
       type: String,
@@ -231,6 +232,18 @@ const schema = new mongoose.Schema({
       required: true,
     },
   },
+  favorite : [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    store: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Store',
+      required: true
+    }
+  }],
     livelocation: [{
     type: {
       type: String,
@@ -312,6 +325,7 @@ const schema = new mongoose.Schema({
       }
     },
   ],
+  
   subscriptionPlanData: [
     {
       subscriptionplanId: {
@@ -342,7 +356,10 @@ const schema = new mongoose.Schema({
        },
        price:{
         type:Number,
-       }
+       },
+       image: {
+        type: String, // Assuming you want to store the image URL
+      },
   }
   ],
   MenuQR:{
