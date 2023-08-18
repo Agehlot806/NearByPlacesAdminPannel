@@ -1120,3 +1120,27 @@ res.status(200).json({
 })
 
 })
+
+export const searchStore = async(req,res)=>{
+  const searchQuery = req.query.q; 
+
+  try {
+    const stores = await Store.find({
+      name: { $regex: new RegExp(searchQuery, 'i') } 
+    }).exec();
+
+    res.status(200).json({
+      success: true,
+      message: 'Store search results',
+      stores
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error searching stores'
+    });
+  }
+}
+
+
