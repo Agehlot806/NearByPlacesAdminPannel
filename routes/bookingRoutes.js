@@ -10,6 +10,7 @@ router.route("/allbooking/:storeId").get(isAuthenticated,authorizeAdmin,getAllBo
 router.route("/mybooking").get(isAuthenticated,getUserBookings);
 router.route("/getbooking/:storeId/:bookingId").get(isAuthenticated,getBooking);
 router.route("/allbookings").get(isAuthenticated,getAllBookingsAllStore);
+router.route("/allbookingsForUser").get(getAllBookingsAllStore);
 router.route("/deletebooking/:bookingId").delete(isAuthenticated,deletebooking);
 
 
