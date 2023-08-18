@@ -434,6 +434,38 @@ export const registerUser = catchAsyncError(async (req, res, next) => {
   });
 });
 
+export const editAdminAvatar = catchAsyncError(async (req, res, next) => {
+  const userId = req.params.userId; // Assuming you have a route parameter for user ID
+  uploadsingle(req, res, async (err) => {
+    if (err)
+      return next(
+        new ErrorHandler("Failed to upload image, please try again later")
+      );
+
+    try {
+      // Find the user by ID
+      const user = await User.findById(userId);
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      // Update the adminavatar field
+      const adminavatarvalue = req.file.location;
+      user.adminavatar = adminavatarvalue;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Admin avatar updated successfully",
+        user,
+      });
+    } catch (error) {
+      console.error("Error while updating admin avatar:", error);
+      return next(new ErrorHandler("Something went wrong", 500));
+    }
+  });
+});
+
 export const editUserProfile = catchAsyncError(async (req, res, next) => {
   try {
     const { name, email, address, latitude, longitude } = req.body;
