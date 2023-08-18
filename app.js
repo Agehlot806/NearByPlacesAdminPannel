@@ -57,7 +57,7 @@ import payment from "./routes/paymentRoutes.js"
 import application from "./routes/applicationRoutes.js"
 import booking from "./routes/bookingRoutes.js";
 import reservation from "./routes/reservationRoutes.js";
-
+import favorite from "./routes/favoriteRoutes.js"
 let baseurl = "/api/v1";
 
 app.use(baseurl, admin);
@@ -71,7 +71,7 @@ app.use(baseurl,payment);
 app.use(baseurl,application);
 app.use(baseurl,booking);
 app.use(baseurl,reservation);
-
+app.use(baseurl,favorite)
 // let baseurldata = 
 // ApiConfig.findOne({}, (err, doc) => {
 //   if (err) {
