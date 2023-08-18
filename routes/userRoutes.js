@@ -1,5 +1,5 @@
 import express from "express";
-import {verify_Register,editUserProfile,PhoneOtp_Register,PhoneOtp_Login,getUserDetailsByOtpId,login,verify_Login,getMyProfile,Banner,logout,registerAdmin,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
+import {verify_Register,editAdminAvatar,editUserProfile,PhoneOtp_Register,PhoneOtp_Login,getUserDetailsByOtpId,login,verify_Login,getMyProfile,Banner,logout,registerAdmin,registerUser, updateProfile,updatePassword,forgetPassword,resetPassword, testapi, updateUserRole, getallusers, SendNotification, merchantRegister, sendEmailtoAll, getUserfavoriateResturent, removeUserFavoriteRestaurant, countUserLikedRestaurants} from "../controllers/adminController.js";
 import {authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 import passport from "../utils/strategy.js";
 import { getGraphData } from "../controllers/dashboardController.js";
@@ -20,6 +20,7 @@ router.route("/logout").get(logout);
 router.route("/myprofile/:id").get(isAuthenticated,getMyProfile);
 router.route("/updateadminpassword").put(isAuthenticated,updatePassword);
 router.route("/updateadminprofile/:id").put(isAuthenticated,updateProfile);
+router.route("/editAdminAvatar/:userId").put(editAdminAvatar);
 router.route("/forgetpassword").post(forgetPassword);
 router.route("/testapi").post(testapi);
 // ResetPassword
