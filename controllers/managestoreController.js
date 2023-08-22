@@ -1143,4 +1143,42 @@ export const searchStore = async(req,res)=>{
   }
 }
 
+export const searchStore = async(req,res)=>{
+  try {
+    const { categoryName } = req.query;
+
+    // Find the category by name
+    const category = await Category.findOne({ categoryname: categoryName });
+
+    if (!category) {   
+      return res.status(404).json({ message: 'Category not found' });
+    }
+
+    // Find stores with matching category
+    const stores = await Store.find({ category: category._id });
+
+    res.json({ stores });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+export const SearchOnlyStore = async(req,res)=>{
+
+  try {
+    const { storeName } = req.query;
+  
+    // Perform case-insensitive search for stores with matching name
+    const stores = await Store.find({ name: { $regex: storeName, $options: 'i' } });
+  
+    res.json({ stores });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+
+}  
+
+
 
