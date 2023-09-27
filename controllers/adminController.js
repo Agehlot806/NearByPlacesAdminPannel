@@ -323,7 +323,7 @@ export const login = catchAsyncError(async (req, res, next) => {
   const isMatch = await user.comparePassword(password);
   if (!isMatch)
     return next(new ErrorHandler("Incorrect Email or Password", 401));
-  sendToken(res, user, `Welcome back, ${user.email}`, 200);
+  sendToken(res, user, `Welcome back TO, ${user.email}`, 200);
 });
 
 export const registerAdmin = catchAsyncError(async (req, res, next) => {
