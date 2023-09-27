@@ -16,7 +16,7 @@ export const AddUserFav = async (req, res, next) => {
     );
 
     if (existingFavorite) {
-      return res.status(400).json({ message: "Favorite already exists" });
+      return res.status(200).json({ message: "Favorite already exists" });
     }
 
     // Add the new favorite
@@ -50,7 +50,7 @@ export const UnFavorite = async(req,res)=>{
         );
     
         if (favIndex === -1) {
-          return res.status(400).json({ message: "Favorite not found" });
+          return res.status(404).json({ message: "Favorite not found" });
         }
     
         // Remove the favorite
