@@ -22,8 +22,11 @@ export const AddUserFav = async (req, res, next) => {
     // Add the new favorite
     store.favorite.push({ user: userId, store: storeId });
     await store.save();
-
-    res.status(201).json({ message: "Favorite added successfully" });
+    res.status(201).json({ message: "Favorite added successfully",
+    "Favourite Store" : store.name,
+    "Favourite StoreId":storeId,
+    userId,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -54,7 +57,13 @@ export const UnFavorite = async(req,res)=>{
         store.favorite.splice(favIndex, 1);
         await store.save();
     
-        res.status(200).json({ message: "Favorite removed successfully" });
+          res.status(200).json(
+          {
+             message: "Favorite removed successfully",
+              "Store Removed From Favourite" : store.name,
+              "StoreId":storeId,
+               userId, 
+        });
       } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
