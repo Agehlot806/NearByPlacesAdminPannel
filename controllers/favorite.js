@@ -72,3 +72,17 @@ export const UnFavorite = async(req,res)=>{
         res.status(500).json({ message: "Internal server error" });
       }
 }
+
+export const GetUserFavorites = async (req, res, next) => {
+  try {
+    const userId = req.params.userId;
+
+    // Find the user's favorite restaurants based on their user ID
+    const favorites = await Store.find({ 'favorite.user': userId });
+
+    res.status(200).json({ favorites });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
