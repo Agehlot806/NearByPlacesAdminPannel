@@ -259,7 +259,7 @@ function generateBookingId() {
 }
 
 
-
+//console.log("rrr");
 //get all booking of particular store
 export const getAllBookings = async (req, res, next) => {
   const storeId = req.params.storeId;
