@@ -356,7 +356,7 @@ export const getAllBookingsAllStore = async (req, res, next) => {
 //DeleteBooking
 export const deletebooking  = catchAsyncError(async(req,res,next)=>{
   const bookingId = req.params.bookingId;
-  let booking = await Booking.findById(bookingId);
+  let booking = await Booking.findOne({bookingId});
   if(!booking){
     return next(new ErrorHandler("Booking not found",400))
   }
@@ -365,5 +365,5 @@ export const deletebooking  = catchAsyncError(async(req,res,next)=>{
     success:true,
     message:"Booking deleted successfully"
   })
-})
+})u
  
