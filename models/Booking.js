@@ -30,6 +30,9 @@ const BookingSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  table_price:{
+   type:Number,
+  },
    month :{
    type : String
   },

@@ -8,7 +8,7 @@ import { BookingModelDataModel } from "../models/BookingModelDataModel.js";
 // import { BookingTable } from "../models/BookingTable.js";
 export const checkout = catchAsyncError(async (req, res, next)  => {
   const bookingId = req.params.id;
-  const booking = await Booking.findById(bookingId);
+  const booking = await Booking.findOne({bookingId});
   // console.log(booking)
   if (!booking) {
     return next(new ErrorHandler('Booking not found', 404));
