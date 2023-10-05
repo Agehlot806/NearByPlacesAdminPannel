@@ -365,5 +365,5 @@ export const deletebooking  = catchAsyncError(async(req,res,next)=>{
     success:true,
     message:"Booking deleted successfully"
   })
-})u
+})
  
