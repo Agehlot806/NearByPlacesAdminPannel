@@ -226,6 +226,7 @@ export const NewBookingByUser = async (req, res, next) => {
     });
 
     table.tableStatus = 'unavailable';
+    table.bookings.push({ date, time, people });
     await storeData.save();
 
     const currentTime = new Date();
