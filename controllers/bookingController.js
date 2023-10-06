@@ -266,7 +266,7 @@ export const getAllBookings = async (req, res, next) => {
 
   try {
     const storeData = await Store.findById(storeId);
-
+//console.log("123");
     if (!storeData) {
       return res.status(404).json({
         success: false,
