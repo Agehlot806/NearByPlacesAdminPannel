@@ -58,7 +58,7 @@ export const createTable = async (req, res, next) => {
 export const updatetableStatus = async(req,res,next) =>{
   const bookingID = req.body.bookingID;
   const tableId = req.params.id;
-  const bookingFind = await Booking.findById(bookingID);
+  const bookingFind =await Booking.findOne({bookingId:bookingID});
   if(bookingFind.BookingStatus=="Confirmed"){
     console.log(bookingFind, 'bookingFind');
     const tableFind = await BookingTable.findByIdAndUpdate(tableId);
