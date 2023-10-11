@@ -32,7 +32,7 @@ export const getAllCategory = catchAsyncError(async(req,res,next)=>{
     const category  = await Category.find({});
     res.status(200).json({
         success:true,
-        message:"getting all the category",
+        message:"getting all the categories",
         category
     })
 })
