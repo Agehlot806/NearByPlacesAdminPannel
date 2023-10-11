@@ -3,6 +3,10 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import { Store } from "../models/Stores.js";
 import mongoose from "mongoose";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3668d25cc909767a74fcee3dc0d3938a268ee5f7
 export const NewBookingUser = async (req, res, next) => {
   const storeId = req.params.storeId;
   const tableId = req.params.tableId;
@@ -141,6 +145,7 @@ export const NewBookingByUser = async (req, res, next) => {
     });
 
     table.tableStatus = 'unavailable';
+    table.bookings.push({ date, time, people });
     await storeData.save();
 
     const currentTime = new Date();

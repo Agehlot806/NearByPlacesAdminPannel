@@ -1,10 +1,10 @@
 import { Store } from "../models/Stores.js";
+import { Booking } from "../models/Booking.js";
 export const createTable = async (req, res, next) => {
   const storeId = req.params.storeId;
-  
+ 
   try {
     const storeData = await Store.findById(storeId);
-
     if (!storeData) {
       return res.status(404).json({
         success: false,
