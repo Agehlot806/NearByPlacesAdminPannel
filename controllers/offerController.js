@@ -93,6 +93,7 @@ export const AddnewOffer = catchAsyncError(async (req, res, next) => {
     let offer = await apiFeature.query;
     res.status(200).json({
       success: true,
+      message:"Here is the list of all offers available",
       offer,
       offercount,
       resultPerPage
