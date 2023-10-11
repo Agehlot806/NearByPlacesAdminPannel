@@ -684,6 +684,7 @@ export const updateUserRole = catchAsyncError(async (req, res, next) => {
 export const getallusers = catchAsyncError(async (req, res, next) => {
   const users = await User.find();
   res.status(200).json({
+    message:"Here the list of all users",
     success: true,
     users,
   });
