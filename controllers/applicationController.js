@@ -53,7 +53,7 @@ export const DeleteCategory = catchAsyncError(async(req,res,next)=>{
 })
 
 export const GetcategorybyId = catchAsyncError(async(req,res,next)=>{
-  const category = await Category.findById(req.params.categoryId).populate("stores","name status reviews storeownername storephoto storegallery ratings")
+  const category = await Category.findById(req.params.categoryId).populate("stores","name status reviews storeownername storephoto storegallery ratings ")
   res.status(200).json( {
       success:true,
       category
