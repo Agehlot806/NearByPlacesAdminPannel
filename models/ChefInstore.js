@@ -7,6 +7,9 @@ cname:{
     type:String,
     required:true
 },
+cimage:{
+    type:String
+},
 phone:{
     type:String,
     required:true
