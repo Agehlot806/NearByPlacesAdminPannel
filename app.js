@@ -58,6 +58,8 @@ import application from "./routes/applicationRoutes.js"
 import booking from "./routes/bookingRoutes.js";
 import reservation from "./routes/reservationRoutes.js";
 import favorite from "./routes/favoriteRoutes.js"
+import chef from './routes/chefroutes.js';
+
 let baseurl = "/api/v1";
 
 app.use(baseurl, admin);
@@ -71,7 +73,8 @@ app.use(baseurl,payment);
 app.use(baseurl,application);
 app.use(baseurl,booking);
 app.use(baseurl,reservation);
-app.use(baseurl,favorite)
+app.use(baseurl,favorite);
+app.use(baseurl,chef);
 // let baseurldata = 
 // ApiConfig.findOne({}, (err, doc) => {
 //   if (err) {

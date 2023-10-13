@@ -562,6 +562,7 @@ export const testapi = catchAsyncError(async (req, res, next) => {
 
 export const updatePassword = catchAsyncError(async (req, res, next) => {
   const { oldpassword, newpassword } = req.body;
+  console.log("111");
   if (!oldpassword || !newpassword)
     return next(new ErrorHandler("Please enter all field", 400));
   const user = await User.findById(req.user._id).select("+password");
