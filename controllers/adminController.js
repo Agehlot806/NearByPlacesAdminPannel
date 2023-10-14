@@ -619,13 +619,14 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 
 export const forgetPassword = catchAsyncError(async (req, res, next) => {
   const { email } = req.body;
+  
   const user = await User.findOne({ email });
 
   if (!user) return next(new ErrorHandler("admin not found", 400));
 
   const resetToken = await user.getResetToken();
 
-  await user.save();
+  await user.save({validateBeforeSave:false});
 
   const url = `${process.env.FRONTEND_URL}/api/v1/resetpassword/${resetToken}`;
 

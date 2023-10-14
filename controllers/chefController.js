@@ -5,49 +5,19 @@ import { chefuploadsingle } from "../middlewares/multer.js";
 import ErrorHandler from "../utils/ErrorHandler.js";
 import mongoose from "mongoose";
 
-// export const AddnewChef = catchAsyncError(async (req, res, next) => {
-//   try {
-//     const { cname, phone, address, chefId } = req.body;
-//     const sid = req.params.id;
-//     const mystore = await Store.findById(sid);
-//     if (!cname || !phone)
-//       return next(new ErrorHandler("Please enter all field", 400));
-//     const addchef = await Chefinstore.create({
-//       cname,
-//       phone,
-//       address,
-//       chefId,
-//       storeId: sid,
-//     });
-//     await addchef.save();
-//     res.status(201).json({
-//       success: true,
-//       message: "Chef is successfully created",
-//       addchef,
-//     });
-//   } catch (error) {
-//     console.error("Error while creating chef", error);
-//     return next(new ErrorHandler("Something went wrong", 500));
-//   }
-// });chefuploadsingle
-
 
 export const AddnewChef = catchAsyncError(async (req, res, next) => {
-  chefuploadsingle(req, res, async (err) => {
-    if (err)
-      return next(new ErrorHandler("failed to upload image try again later"));
+  try {
     const { cname, phone, address, chefId } = req.body;
     const sid = req.params.id;
     const mystore = await Store.findById(sid);
     if (!cname || !phone)
       return next(new ErrorHandler("Please enter all field", 400));
-    const cimagevalue = req.file.location;
     const addchef = await Chefinstore.create({
       cname,
       phone,
       address,
       chefId,
-      cimage: cimagevalue,
       storeId: sid,
     });
     await addchef.save();
@@ -56,8 +26,38 @@ export const AddnewChef = catchAsyncError(async (req, res, next) => {
       message: "Chef is successfully created",
       addchef,
     });
-  });
+  } catch (error) {
+    console.error("Error while creating chef", error);
+    return next(new ErrorHandler("Something went wrong", 500));
+  }
 });
+
+// export const AddnewChef = catchAsyncError(async (req, res, next) => {
+//   chefuploadsingle(req, res, async (err) => {
+//     if (err)
+//       return next(new ErrorHandler("failed to upload image try again later"));
+//     const { cname, phone, address, chefId } = req.body;
+//     const sid = req.params.id;
+//     const mystore = await Store.findById(sid);
+//     if (!cname || !phone)
+//       return next(new ErrorHandler("Please enter all field", 400));
+//     const cimagevalue = req.file.location;
+//     const addchef = await Chefinstore.create({
+//       cname,
+//       phone,
+//       address,
+//       chefId,
+//       cimage: cimagevalue,
+//       storeId: sid,
+//     });
+//     await addchef.save();
+//     res.status(201).json({
+//       success: true,
+//       message: "Chef is successfully created",
+//       addchef,
+//     });
+//   });
+// });
 
 export const Getallchef = catchAsyncError(async (req, res, next) => {
   try {

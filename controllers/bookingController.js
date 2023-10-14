@@ -103,7 +103,7 @@ export const NewBookingByUser = async (req, res, next) => {
       });
     }
 
-    const table = storeData.tables.find((table) => table._id.toString() === tableId);
+  const table = storeData.tables.find((table) => table._id.toString() === tableId);
 
     if (!table) {
       return res.status(404).json({
@@ -163,9 +163,6 @@ export const NewBookingByUser = async (req, res, next) => {
     next(err);
   }
 };
-
-
-
 
 
 // Function to generate a unique 6-digit booking ID
